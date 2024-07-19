@@ -1,0 +1,25 @@
+<div class="main-wrapper">
+
+  <app-header></app-header>
+
+  <div class="page-wrapper">
+
+    <div class="content">
+      <div *ngIf="isLoading" class="spinner-wrapper">
+        <div class="loader">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+      <div contentAnimate *ngIf="!isLoading">
+        <router-outlet (activate)="onActivate($event)"></router-outlet>
+      </div>
+    </div>
+
+    <app-footer></app-footer>
+
+  </div>
+</div>
