@@ -5,6 +5,7 @@ const multer = require('multer');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 
+
 const { admin, db, bucket } = require('./firebase/firebase');
 
 const app = express();
@@ -159,73 +160,70 @@ app.put('/update-profile', upload.single('profileImage'), async (req, res) => {
   }
 });
 
-app.post('/v1/products', upload.single('image'), async (req, res) => {
+app.post('/v1/products', upload.array('images', 4), async (req, res) => {
   const {
     name, price, description, amount, type, colour, material, brand, size, totalOrdered, stockStatus
   } = req.body;
-  const file = req.file;
+  const files = req.files;
 
   try {
-    let imageUrl = '';
-    if (file) {
-      const blob = bucket.file(`products/${Date.now()}_${file.originalname}`);
-      const blobStream = blob.createWriteStream({
-        metadata: {
-          contentType: file.mimetype
-        }
-      });
+    const docRef = await db.collection('products').doc(); // Create a new document reference with an auto-generated ID
+    const productId = docRef.id;
+    const imageUrls = [];
 
-      blobStream.on('error', (error) => {
-        console.error('Error uploading file:', error);
-        return res.status(500).json({ message: error.message });
-      });
+    if (files) {
+      for (const file of files) {
+        const blob = bucket.file(`products/${productId}/${Date.now()}_${file.originalname}`);
+        const blobStream = blob.createWriteStream({
+          metadata: {
+            contentType: file.mimetype,
+          },
+        });
 
-      blobStream.on('finish', async () => {
-        imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-        const product = {
-          name,
-          price: parseFloat(price),
-          description,
-          amount: parseInt(amount, 10),
-          type,
-          colour,
-          material,
-          brand,
-          image: imageUrl,
-          size: parseInt(size, 10),
-          totalOrdered: parseInt(totalOrdered, 10),
-          stockStatus
-        };
+        await new Promise((resolve, reject) => {
+          blobStream.on('error', (error) => {
+            console.error('Error uploading file:', error);
+            reject(error);
+          });
 
-        const docRef = await db.collection('products').add(product);
-        res.status(201).json({ message: 'Product added successfully', id: docRef.id, product });
-      });
+          blobStream.on('finish', async () => {
+            await blob.makePublic();
+            const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+            imageUrls.push(imageUrl);
+            resolve();
+          });
 
-      blobStream.end(file.buffer);
-    } else {
-      const product = {
-        name,
-        price: parseFloat(price),
-        description,
-        amount: parseInt(amount, 10),
-        type,
-        colour,
-        material,
-        brand,
-        image: imageUrl,
-        size: parseInt(size, 10),
-        totalOrdered: parseInt(totalOrdered, 10),
-        stockStatus
-      };
-
-      const docRef = await db.collection('products').add(product);
-      res.status(201).json({ message: 'Product added successfully', id: docRef.id, product });
+          blobStream.end(file.buffer);
+        });
+      }
     }
+
+    const product = {
+      name,
+      price: parseFloat(price),
+      description,
+      amount: parseInt(amount, 10),
+      type,
+      colour,
+      material,
+      brand,
+      images: imageUrls,
+      size: parseInt(size, 10),
+      totalOrdered: parseInt(totalOrdered, 10),
+      stockStatus,
+    };
+
+    await docRef.set(product); // Save the product data using the document reference
+
+    res.status(201).json({ message: 'Product added successfully', id: productId, product });
   } catch (error) {
     console.error('Error adding product:', error);
     res.status(500).json({ message: error.message });
   }
 });
+
+
+
 
 app.get('/v1/products', async (req, res) => {
   const { offset = 0, limit = 10 } = req.query;

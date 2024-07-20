@@ -64,69 +64,70 @@
 
 <section class="padding-y">
     <div class="container" infinite-scroll [infiniteScrollDistance]="scrollDistance" [infiniteScrollUpDistance]="scrollUpDistance" [infiniteScrollThrottle]="throttle" (scrolled)="onScroll()">
-        <header class="section-heading  d-flex justify-content-between align-items-center">
-            <h4 class="section-title text-muted">Showing 1 - {{limit}} Products</h4>
-            <div class="filter-container d-flex align-items-center">
-                <p>Sort by: </p>
-                <select class="form-select" [(ngModel)]="fliterValue">
-                    <option value="Default">Default</option>
-                    <option value="Low to High">Price: Low to High</option>
-                    <option value="High to Low">Price: High to Low</option>
-                    <option value="A to Z">A to Z</option>
-                    <option value="Z to A">Z to A</option>
-                </select>
-            </div>
-        </header>
-
-        <div class="row">
-            <div class="col-6 col-sm-8 col-md-6 col-lg-2" style="padding: 15px 7.5px;" *ngFor="let product of products | filter : fliterValue">
-                <div class="product">
-                    <div class="product-image">
-                        <a style="height: 227px;" routerLink="/products/{{product?.id}}">
-                            <img [src]="product?.image" alt="Product_image" onerror="this.onerror=null;this.src='assets/images/ImageNotFound.png'">
-                        </a>
-                        <p class="product-sale" *ngIf="(product?.id)%3==0">Sale</p>
-                        <button type="button" class="btn-favourite btn-circle" [class.is-favourite]='productInWishList(product)' (click)="addProductToWishList(product, $event)">
-                            <i class="fa-solid fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="product-content">
-                        <a class="product-name d-flex justify-content-between align-items-center" routerLink="/products/{{product?.id}}">
-                            <span class="item-title">{{product?.name}}</span>
-                            <span class="badge badge-pill bg-warning p-1">{{product?.type}}</span>
-                        </a>
-                        <ul class="rating-stars">
-                            <li class="stars-active" style="width: 90%;">
-                                <img src="assets/images/stars-active.svg" alt="">
-                            </li>
-                        </ul>
-                        <div class="product-content__footer">
-                            <div class="product-content__footer-price">
-                                <h5 class="product-price">${{product?.price}}</h5>
-                                <span *ngIf="(product?.id)%3==0">$59.99</span>
-                            </div>
-                            <span class="product-atc rounded-circle">
-                                <button type="button" class="btn btn-circle text-muted" (click)="addProductToCart(product)">
-                                    <i class="fa fa-shopping-cart"></i>
-                                </button>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <header class="section-heading  d-flex justify-content-between align-items-center">
+        <h4 class="section-title text-muted">Showing 1 - {{limit}} Products</h4>
+        <div class="filter-container d-flex align-items-center">
+          <p>Sort by: </p>
+          <select class="form-select" [(ngModel)]="filterValue">
+            <option value="Default">Default</option>
+            <option value="Low to High">Price: Low to High</option>
+            <option value="High to Low">Price: High to Low</option>
+            <option value="A to Z">A to Z</option>
+            <option value="Z to A">Z to A</option>
+          </select>
         </div>
-
-        <div class="row" *ngIf="Loading">
-            <div class="col-6 col-sm-8 col-md-6 col-lg-2" *ngFor="let item of items">
-                <ngx-skeleton-loader [theme]="{ 'border-radius': '0', height: '150px' }"></ngx-skeleton-loader>
-                <ngx-skeleton-loader count="2" [theme]="{ 'border-radius': '0', height: '25px' }"></ngx-skeleton-loader>
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="w-50">
-                        <ngx-skeleton-loader [theme]="{ 'border-radius': '0', height: '28px' }"></ngx-skeleton-loader>
-                    </div>
-                    <ngx-skeleton-loader appearance="circle" [theme]="{ width: '29px', height: '29px', margin: '1px' }"></ngx-skeleton-loader>
-                </div>
+      </header>
+  
+      <div class="row">
+        <div class="col-6 col-sm-8 col-md-6 col-lg-2" style="padding: 15px 7.5px;" *ngFor="let product of products | filter : filterValue">
+          <div class="product">
+            <div class="product-image">
+              <a style="height: 227px;" routerLink="/products/{{product?.id}}">
+                <img [src]="product?.image" alt="Product_image" onerror="this.onerror=null;this.src='assets/images/ImageNotFound.png'">
+              </a>
+              <p class="product-sale" *ngIf="(product?.id)%3==0">Sale</p>
+              <button type="button" class="btn-favourite btn-circle" [class.is-favourite]='productInWishList(product)' (click)="addProductToWishList(product, $event)">
+                <i class="fa-solid fa-heart"></i>
+              </button>
             </div>
+            <div class="product-content">
+              <a class="product-name d-flex justify-content-between align-items-center" routerLink="/products/{{product?.id}}">
+                <span class="item-title">{{product?.name}}</span>
+                <span class="badge badge-pill bg-warning p-1">{{product?.type}}</span>
+              </a>
+              <ul class="rating-stars">
+                <li class="stars-active" style="width: 90%;">
+                  <img src="assets/images/stars-active.svg" alt="">
+                </li>
+              </ul>
+              <div class="product-content__footer">
+                <div class="product-content__footer-price">
+                  <h5 class="product-price">${{product?.price}}</h5>
+                  <span *ngIf="(product?.id)%3==0">$59.99</span>
+                </div>
+                <span class="product-atc rounded-circle">
+                  <button type="button" class="btn btn-circle text-muted" (click)="addProductToCart(product)">
+                    <i class="fa fa-shopping-cart"></i>
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+  
+      <div class="row" *ngIf="Loading">
+        <div class="col-6 col-sm-8 col-md-6 col-lg-2" *ngFor="let item of items">
+          <ngx-skeleton-loader [theme]="{ 'border-radius': '0', height: '150px' }"></ngx-skeleton-loader>
+          <ngx-skeleton-loader count="2" [theme]="{ 'border-radius': '0', height: '25px' }"></ngx-skeleton-loader>
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="w-50">
+              <ngx-skeleton-loader [theme]="{ 'border-radius': '0', height: '28px' }"></ngx-skeleton-loader>
+            </div>
+            <ngx-skeleton-loader appearance="circle" [theme]="{ width: '29px', height: '29px', margin: '1px' }"></ngx-skeleton-loader>
+          </div>
+        </div>
+      </div>
     </div>
-</section>
+  </section>
+  

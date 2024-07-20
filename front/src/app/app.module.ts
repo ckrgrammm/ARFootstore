@@ -18,6 +18,8 @@ import { AuthService } from './views/pages/auth/services/auth.service';
 import { LocalstorageService } from './views/pages/auth/services/localstorage.service';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from './views/shared/shared.module';
+import { AdminModule } from './views/pages/admin/admin.module'; 
+
 
 @NgModule({
   declarations: [
@@ -36,7 +38,9 @@ import { SharedModule } from './views/shared/shared.module';
     FormsModule,
     ReactiveFormsModule,
     SharedModule,
-    HotToastModule.forRoot()
+    HotToastModule.forRoot(),
+    AdminModule  
+
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }

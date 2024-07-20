@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';  // Import Router
 import { UserService } from './services/user.service';
-import { LocalstorageService } from '../auth/services/localstorage.service';
+import { AuthService } from '../auth/services/auth.service';  // Import AuthService
+import { HotToastService } from '@ngneat/hot-toast';  // Import HotToastService
 
 @Component({
   selector: 'app-user',
@@ -13,12 +14,13 @@ export class UserComponent implements OnInit {
 
   constructor(
     private _userService: UserService,
-    private _localstorageService: LocalstorageService,
-    private _router: Router  // Inject Router
+    private _auth: AuthService,  // Inject AuthService
+    private _router: Router,  // Inject Router
+    private _toast: HotToastService  // Inject HotToastService
   ) { }
 
   ngOnInit(): void {
-    const email = this._localstorageService.getEmail();
+    const email = this._auth.getEmail();
     if (email) {
       this._userService.getUser(email).subscribe(
         (user: any) => {
@@ -35,7 +37,14 @@ export class UserComponent implements OnInit {
 
   logout(event: Event): void {
     event.preventDefault();  // Prevent the default anchor behavior
-    this._localstorageService.removeToken();  // Remove token from local storage
-    this._router.navigate(['/login']);  // Navigate to the login page or appropriate page
+
+    const toastRef = this._toast.loading('Logging you out...');  // Display the loading toast message and get a reference to it
+
+    setTimeout(() => {
+      this._auth.logout();  // Use AuthService to handle logout
+      toastRef.close();  // Close the loading toast
+      this._toast.success('Successfully logged out');  // Display the success toast message
+      this._router.navigate(['/products']);  // Navigate to the products page
+    }, 2000);  // Delay of 2 seconds
   }
 }

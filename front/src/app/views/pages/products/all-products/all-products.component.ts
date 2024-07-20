@@ -18,15 +18,15 @@ export class AllProductsComponent implements OnInit {
   numberOfPages: any[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
   isFavourite: boolean = false;
   WishItems!: WishItem[];
-  fliterValue: string = "Default";
-  items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20]
+  filterValue: string = "Default";
+  items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20];
   Loading: boolean = false;
 
   throttle = 300;
   scrollDistance = 1;
   scrollUpDistance = 2;
   limit: number = 20;
-  
+
   constructor(
     private _product: ProductService,
     private _cartService: CartService,
@@ -57,10 +57,9 @@ export class AllProductsComponent implements OnInit {
       quantity: 1
     };
     this._cartService.setCartItem(cartItem);
-    this._toast.success('Product added to cart successfully',
-      {
-        position: 'top-left'
-      });
+    this._toast.success('Product added to cart successfully', {
+      position: 'top-left'
+    });
   }
 
   addProductToWishList(item: any, event: any) {
@@ -68,20 +67,17 @@ export class AllProductsComponent implements OnInit {
       product: item
     };
     if (event.currentTarget.classList.contains("is-favourite")) {
-      event.currentTarget.classList.remove("is-favourite")
+      event.currentTarget.classList.remove("is-favourite");
       this._wishlistService.deleteWishItem(WishItem.product.id);
-      this._toast.error('Product removed from wishlist',
-        {
-          position: 'top-left'
-        });
-    }
-    else {
-      event.currentTarget.classList.add("is-favourite")
+      this._toast.error('Product removed from wishlist', {
+        position: 'top-left'
+      });
+    } else {
+      event.currentTarget.classList.add("is-favourite");
       this._wishlistService.setWishItem(WishItem);
-      this._toast.success('Product added to wishlist successfully',
-        {
-          position: 'top-left'
-        });
+      this._toast.success('Product added to wishlist successfully', {
+        position: 'top-left'
+      });
     }
   }
 

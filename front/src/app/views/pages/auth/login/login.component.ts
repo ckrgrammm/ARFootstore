@@ -39,12 +39,12 @@ export class LoginComponent implements OnInit {
 
   onSubmit() {
     this.isSubmitted = true;
-
+  
     if (this.loginFormGroup.invalid) return;
-
+  
     const email = this.loginForm.email.value;
-    console.log('Email:', email);  // Log the email
-
+    console.log('Email:', email);
+  
     this._auth.login(email, this.loginForm.password.value).pipe(
       this._toast.observe({
         loading: 'Logging in...',
@@ -55,20 +55,13 @@ export class LoginComponent implements OnInit {
       (user) => {
         this.authError = false;
         this._localstorageService.setToken(user.access_token);
-        this._localstorageService.setItem('email', email);  // Store email in local storage
+        this._localstorageService.setItem('email', email);
         this._auth.startRefreshTokenTimer();
-
-        // Fetch user details and set profile data
+  
         this._userService.getUser(email).subscribe(
           (userDetails: any) => {
             this._userProfileService.setProfileData(userDetails);
-
-            // Navigate based on roles
-            if (user.roles === 'admin') {
-              window.location.href = 'https://www.google.com'; // Navigate to an external URL
-            } else {
-              this._router.navigate(['/']);
-            }
+            this._router.navigate(['/']);
           },
           (error: any) => {
             console.error('Failed to fetch user details:', error);
@@ -83,6 +76,7 @@ export class LoginComponent implements OnInit {
       }
     );
   }
+  
 
   get loginForm() {
     return this.loginFormGroup.controls;

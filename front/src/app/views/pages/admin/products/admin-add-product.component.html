@@ -1,0 +1,87 @@
+<div class="container mt-5">
+  <h2>Add New Product</h2>
+  <form [formGroup]="addProductForm" (ngSubmit)="onSubmit()">
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input type="text" class="form-control" id="name" formControlName="name">
+      <div *ngIf="isSubmitted && f.name.errors" class="text-danger">
+        Name is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="price" class="form-label">Price</label>
+      <input type="text" class="form-control" id="price" formControlName="price">
+      <div *ngIf="isSubmitted && f.price.errors" class="text-danger">
+        Price is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control" id="description" rows="3" formControlName="description"></textarea>
+      <div *ngIf="isSubmitted && f.description.errors" class="text-danger">
+        Description is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="amount" class="form-label">Amount</label>
+      <input type="text" class="form-control" id="amount" formControlName="amount">
+      <div *ngIf="isSubmitted && f.amount.errors" class="text-danger">
+        Amount is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="type" class="form-label">Type</label>
+      <input type="text" class="form-control" id="type" formControlName="type">
+      <div *ngIf="isSubmitted && f.type.errors" class="text-danger">
+        Type is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="colour" class="form-label">Colour</label>
+      <input type="text" class="form-control" id="colour" formControlName="colour">
+      <div *ngIf="isSubmitted && f.colour.errors" class="text-danger">
+        Colour is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="material" class="form-label">Material</label>
+      <input type="text" class="form-control" id="material" formControlName="material">
+      <div *ngIf="isSubmitted && f.material.errors" class="text-danger">
+        Material is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="brand" class="form-label">Brand</label>
+      <input type="text" class="form-control" id="brand" formControlName="brand">
+      <div *ngIf="isSubmitted && f.brand.errors" class="text-danger">
+        Brand is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="size" class="form-label">Size</label>
+      <input type="text" class="form-control" id="size" formControlName="size">
+      <div *ngIf="isSubmitted && f.size.errors" class="text-danger">
+        Size is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="totalOrdered" class="form-label">Total Ordered</label>
+      <input type="text" class="form-control" id="totalOrdered" formControlName="totalOrdered">
+      <div *ngIf="isSubmitted && f.totalOrdered.errors" class="text-danger">
+        Total Ordered is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="stockStatus" class="form-label">Stock Status</label>
+      <input type="text" class="form-control" id="stockStatus" formControlName="stockStatus">
+      <div *ngIf="isSubmitted && f.stockStatus.errors" class="text-danger">
+        Stock Status is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="images" class="form-label">Images</label>
+      <input type="file" class="form-control" id="images" (change)="onFilesSelected($event)" multiple>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Product</button>
+  </form>
+</div>

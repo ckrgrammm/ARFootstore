@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { AuthService } from '../../pages/auth/services/auth.service';
 import { CartService } from '../../pages/services/cart.service';
 import { WishlistService } from '../../pages/services/wishlist.service';
-import { UserProfileService } from '../../shared/user/user-profile.service'; // Adjust the path as needed
+import { UserProfileService } from '../../shared/user/user-profile.service';
 
 @Component({
   selector: 'app-header',
@@ -17,6 +17,7 @@ export class HeaderComponent implements OnInit {
   loggedIn: boolean = false;
   profileImage: string | null = null;
   user: any = null;
+  isAdmin: boolean = false;
 
   constructor(
     private _cartService: CartService,
@@ -38,12 +39,36 @@ export class HeaderComponent implements OnInit {
     this._wishlistService.wishList$.subscribe((wishList) => {
       this.wishCount = wishList?.items?.length ?? 0;
     });
+
     this.loggedIn = this._auth.loggedIn();
     console.log(this.loggedIn);
 
     this._userProfileService.profileData$.subscribe((profileData) => {
       this.user = profileData;
       this.profileImage = profileData?.profileImage || 'assets/images/avatar.jpg';
+      this.isAdmin = profileData?.roles === 'admin';
     });
+
+    this._auth.loggedInStatus$.subscribe((status) => {
+      this.loggedIn = status;
+      if (this.loggedIn) {
+        this.loadUserProfile();
+      } else {
+        this.user = null;
+        this.profileImage = 'assets/images/avatar.jpg';
+        this.isAdmin = false;
+      }
+    });
+  }
+
+  loadUserProfile() {
+    const email = this._auth.getEmail();
+    if (email) {
+      this._userProfileService.getProfileData().subscribe((profileData) => {
+        this.user = profileData;
+        this.profileImage = profileData?.profileImage || 'assets/images/avatar.jpg';
+        this.isAdmin = profileData?.roles === 'admin';
+      });
+    }
   }
 }

@@ -44,7 +44,7 @@ export class RegisterComponent implements OnInit {
       this.registerForm.password.value
     ).pipe(
       this._toast.observe({
-        loading: 'Logging in...',
+        loading: 'Registering in...',
         success: 'Congrats! You are registered',
         error: ({ error }) => `There was an error: ${error.message} `
       })

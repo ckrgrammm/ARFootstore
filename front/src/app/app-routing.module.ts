@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { BaseComponent } from './views/layout/base/base.component';
 import { AuthGuard } from './views/pages/auth/services/auth-guard.service';
 import { ErrorPageComponent } from './views/pages/error-page/error-page.component';
+import { AdminAddProductComponent } from './views/pages/admin/products/admin-add-product.component';
 
 const routes: Routes = [
   {
@@ -37,6 +38,11 @@ const routes: Routes = [
           import('./views/pages/user/user.module').then(
             (m) => m.UserModule
           ),
+      },
+      {
+        path: 'admin/products/add',
+        component: AdminAddProductComponent,
+        canActivate: [AuthGuard],  
       },
       { path: '', redirectTo: 'products', pathMatch: 'full' },
     ]
