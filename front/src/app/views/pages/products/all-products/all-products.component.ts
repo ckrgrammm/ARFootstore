@@ -38,8 +38,12 @@ export class AllProductsComponent implements OnInit {
     this.Loading = true;
     this._product.getProduct(offset, limit).subscribe((data) => {
       console.log('Retrieved products:', data); // Logging the retrieved products
-      data.forEach((product: { image: any; }) => console.log('Product Image URL:', product.image)); // Log image URLs
-
+  
+      data.forEach((product: any) => {
+        product.image = product.images && product.images.length > 0 ? product.images[0] : 'assets/images/ImageNotFound.png';
+        console.log('Product Image URL:', product.image); // Log image URLs
+      });
+  
       setTimeout(() => {
         this.products = [...this.products, ...data];
         console.log('Updated products array:', this.products); // Logging the updated products array
@@ -50,6 +54,8 @@ export class AllProductsComponent implements OnInit {
       this.Loading = false;
     });
   }
+  
+  
 
   addProductToCart(item: any) {
     const cartItem: CartItem = {
@@ -82,13 +88,20 @@ export class AllProductsComponent implements OnInit {
   }
 
   productInWishList(itm: any) {
-    const cartItemExist = this.WishItems.find((item) => item.product.id === itm.id);
-    return cartItemExist;
+    if (this.WishItems) {
+      const cartItemExist = this.WishItems.find((item) => item.product.id === itm.id);
+      return cartItemExist;
+    }
+    return false;
   }
 
   getWishList() {
     this._wishlistService.wishList$.subscribe((cart) => {
-      this.WishItems = cart.items!;
+      if (cart && cart.items) {
+        this.WishItems = cart.items;
+      } else {
+        this.WishItems = [];
+      }
     });
   }
 

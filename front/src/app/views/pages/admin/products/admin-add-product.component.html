@@ -9,31 +9,10 @@
       </div>
     </div>
     <div class="mb-3">
-      <label for="price" class="form-label">Price</label>
-      <input type="text" class="form-control" id="price" formControlName="price">
-      <div *ngIf="isSubmitted && f.price.errors" class="text-danger">
-        Price is required
-      </div>
-    </div>
-    <div class="mb-3">
-      <label for="description" class="form-label">Description</label>
-      <textarea class="form-control" id="description" rows="3" formControlName="description"></textarea>
-      <div *ngIf="isSubmitted && f.description.errors" class="text-danger">
-        Description is required
-      </div>
-    </div>
-    <div class="mb-3">
-      <label for="amount" class="form-label">Amount</label>
-      <input type="text" class="form-control" id="amount" formControlName="amount">
-      <div *ngIf="isSubmitted && f.amount.errors" class="text-danger">
-        Amount is required
-      </div>
-    </div>
-    <div class="mb-3">
-      <label for="type" class="form-label">Type</label>
-      <input type="text" class="form-control" id="type" formControlName="type">
-      <div *ngIf="isSubmitted && f.type.errors" class="text-danger">
-        Type is required
+      <label for="brand" class="form-label">Brand</label>
+      <input type="text" class="form-control" id="brand" formControlName="brand">
+      <div *ngIf="isSubmitted && f.brand.errors" class="text-danger">
+        Brand is required
       </div>
     </div>
     <div class="mb-3">
@@ -44,6 +23,13 @@
       </div>
     </div>
     <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control" id="description" rows="3" formControlName="description"></textarea>
+      <div *ngIf="isSubmitted && f.description.errors" class="text-danger">
+        Description is required
+      </div>
+    </div>
+    <div class="mb-3">
       <label for="material" class="form-label">Material</label>
       <input type="text" class="form-control" id="material" formControlName="material">
       <div *ngIf="isSubmitted && f.material.errors" class="text-danger">
@@ -51,29 +37,34 @@
       </div>
     </div>
     <div class="mb-3">
-      <label for="brand" class="form-label">Brand</label>
-      <input type="text" class="form-control" id="brand" formControlName="brand">
-      <div *ngIf="isSubmitted && f.brand.errors" class="text-danger">
-        Brand is required
+      <label for="amount" class="form-label">Amount</label>
+      <input type="number" class="form-control" id="amount" formControlName="amount">
+      <div *ngIf="isSubmitted && f.amount.errors" class="text-danger">
+        Amount is required
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="price" class="form-label">Price</label>
+      <input type="number" step="0.01" class="form-control" id="price" formControlName="price">
+      <div *ngIf="isSubmitted && f.price.errors" class="text-danger">
+        Price is required
       </div>
     </div>
     <div class="mb-3">
       <label for="size" class="form-label">Size</label>
-      <input type="text" class="form-control" id="size" formControlName="size">
+      <select class="form-select" id="size" formControlName="size">
+        <option *ngFor="let size of sizes" [value]="size">{{size}}</option>
+      </select>
       <div *ngIf="isSubmitted && f.size.errors" class="text-danger">
         Size is required
       </div>
     </div>
     <div class="mb-3">
-      <label for="totalOrdered" class="form-label">Total Ordered</label>
-      <input type="text" class="form-control" id="totalOrdered" formControlName="totalOrdered">
-      <div *ngIf="isSubmitted && f.totalOrdered.errors" class="text-danger">
-        Total Ordered is required
-      </div>
-    </div>
-    <div class="mb-3">
       <label for="stockStatus" class="form-label">Stock Status</label>
-      <input type="text" class="form-control" id="stockStatus" formControlName="stockStatus">
+      <select class="form-select" id="stockStatus" formControlName="stockStatus">
+        <option [value]="true">In Stock</option>
+        <option [value]="false">Out of Stock</option>
+      </select>
       <div *ngIf="isSubmitted && f.stockStatus.errors" class="text-danger">
         Stock Status is required
       </div>

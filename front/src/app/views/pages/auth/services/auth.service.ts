@@ -1,4 +1,3 @@
-// auth.service.ts
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
@@ -31,8 +30,8 @@ export class AuthService {
     return this.http.post<any>(`${environment.api}login`, { email, password }).pipe(
       map((user) => {
         this._token.setToken(user.access_token);
-        this._token.setEmail(email); // Set email in local storage
-        this._token.setItem('roles', user.roles);
+        this._token.setEmail(email); 
+        this._token.setRoles(user.roles); 
         this.loggedInStatus.next(true);
         this.startRefreshTokenTimer();
         return user;
@@ -54,12 +53,9 @@ export class AuthService {
   }
 
   logout() {
-    this._token.removeToken();
-    this._token.removeItem('roles');
-    this._token.removeItem('email');
-    this._token.clear(); // Clear all user-related local storage items
+    this._token.clear(); 
     this.loggedInStatus.next(false);
-    this.router.navigate(['/auth']);
+    this.router.navigate(['/products']);
   }
 
   getEmail(): string | null {
@@ -67,7 +63,7 @@ export class AuthService {
   }
 
   getRoles(): string | null {
-    return this._token.getItem('roles');
+    return this._token.getRoles();
   }
 
   refreshToken(): Observable<any> {
@@ -82,16 +78,13 @@ export class AuthService {
   }
 
   startRefreshTokenTimer() {
-    console.log('start Refresh Token Timer');
     const jwtToken = this._token.getToken();
     if (!jwtToken) {
-      console.error('No JWT token found');
       return;
     }
     const jwtTokenDecode = JSON.parse(atob(jwtToken.split('.')[1]));
     const expires = new Date(jwtTokenDecode.exp * 1000);
     const timeout = expires.getTime() - Date.now() - (60 * 1000);
-    console.log('timeout', timeout);
     this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
   }
 

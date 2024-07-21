@@ -21,5 +21,18 @@ export class ProductService {
   getProductsByCategory(id: string): Observable<any> {  
     return this._HttpClient.get<any>(`${environment.api}v1/categories/${id}/products?offset=0&limit=10`);
   }
+
+  getProductsByType(type: string): Observable<any[]> {
+    return this._HttpClient.get<any[]>(`${environment.api}v1/products?type=${type}`);
+  }
+
+  // searchProducts(query: string, type: string): Observable<any[]> {
+  //   return this._HttpClient.get<any[]>(`${environment.api}v1/search`, { params: { query, type } });
+  // }
+
+  searchProducts(query: string): Observable<any[]> {
+    return this._HttpClient.get<any[]>(`${environment.api}v1/search`, { params: { query } });
+  }
+  
   
 }

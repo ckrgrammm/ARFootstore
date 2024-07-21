@@ -105,17 +105,17 @@ export class ProductDetailsComponent implements OnInit {
     nav: true,
   }
 
-  product: any = {};
+  product: any;
   productId!: string;
-  categoryId!: string;
   imgNotFounded: boolean = false;
-  cartList!: CartItem[];
-  WishItems!: WishItem[];
-  quantity!: number;
+  cartList: CartItem[] = [];
+  WishItems: WishItem[] = [];
+  quantity: number = 0;
   loremText: string = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iusto, quos aspernatur eum dolorr eprehenderit eos et libero debitis itaque voluptatem! Laudantium modi sequi, id numquam liberosed quaerat. Eligendi, ipsum!`;
-  categoryProducts: any;
+  relatedProducts: any;
   isProductInWishList: boolean = false;
   productInCartList: any;
+  sizes: number[] = [9, 10, 11, 12, 13, 14, 15]; // Sizes for shoes
 
   constructor(
     private _productService: ProductService,
@@ -133,7 +133,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   nextSlide(event: any) {
-    if (event.dragging == false) {
+    if (event.dragging === false) {
       this.startPosition = event.data.startPosition;
       const anyService = this.myCarousel as any;
       const carouselService = anyService.carouselService as CarouselService;
@@ -141,22 +141,26 @@ export class ProductDetailsComponent implements OnInit {
     }
   }
 
-  getproduct() {
-    this._productService.getSingleProduct(this.productId).subscribe((data) => {
-      this.product = data;
-      this.categoryId = data.category.id;
-      this.getProductsByCategory(this.categoryId);
-      this.productInCartList = this.checkProductInCartList(data);
-      this.isProductInWishList = this.productInWishList(data);
-      if (data.images.length == 1) {
-        this.imgNotFounded = true;
+  getProduct() {
+    this._productService.getSingleProduct(this.productId).subscribe(
+      (data) => {
+        this.product = data;
+        this.getProductsByType(this.product.type);  // Use type instead of category
+        this.productInCartList = this.checkProductInCartList(data);
+        this.isProductInWishList = this.productInWishList(data);
+        if (data.images.length === 1) {
+          this.imgNotFounded = true;
+        }
+      },
+      (error) => {
+        console.error('Error loading product:', error);
       }
-    });
+    );
   }
 
   getCartList() {
     this._cartService.cart$.subscribe((cart) => {
-      this.cartList = cart.items!;
+      this.cartList = cart.items || [];
       if (this.product) {
         this.productInCartList = this.checkProductInCartList(this.product);
       }
@@ -165,7 +169,7 @@ export class ProductDetailsComponent implements OnInit {
 
   getWishList() {
     this._wishlistService.wishList$.subscribe((cart) => {
-      this.WishItems = cart.items!;
+      this.WishItems = cart.items || [];
       if (this.product) {
         this.isProductInWishList = this.productInWishList(this.product);
       }
@@ -179,12 +183,11 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   productInWishList(product: any) {
-    const WishItemExist = this.WishItems.some((item) => item.product.id === product.id);
-    return WishItemExist;
+    return this.WishItems.some((item) => item.product.id === product.id);
   }
 
   updateCartItemQuantity(value: number, product: any, operation: string) {
-    if (operation == "+") {
+    if (operation === "+") {
       value++;
     } else {
       value--;
@@ -200,10 +203,7 @@ export class ProductDetailsComponent implements OnInit {
 
   addProductToCart(item: any) {
     if (!this.product.stockStatus) {
-      this._toast.error('Product is out of stock',
-        {
-          position: 'top-left'
-        });
+      this._toast.error('Product is out of stock', { position: 'top-left' });
       return;
     }
     const cartItem: CartItem = {
@@ -211,10 +211,7 @@ export class ProductDetailsComponent implements OnInit {
       quantity: 1
     };
     this._cartService.setCartItem(cartItem);
-    this._toast.success('Product added to cart successfully',
-      {
-        position: 'top-left'
-      });
+    this._toast.success('Product added to cart successfully', { position: 'top-left' });
   }
 
   addProductToWishList(item: any) {
@@ -223,40 +220,37 @@ export class ProductDetailsComponent implements OnInit {
     };
     if (this.isProductInWishList) {
       this._wishlistService.deleteWishItem(WishItem.product.id);
-      this._toast.error('Product removed from wishlist',
-        {
-          position: 'top-left'
-        });
-    }
-    else {
+      this._toast.error('Product removed from wishlist', { position: 'top-left' });
+    } else {
       this._wishlistService.setWishItem(WishItem);
-      this._toast.success('Product added to wishlist successfully',
-        {
-          position: 'top-left'
-        });
+      this._toast.success('Product added to wishlist successfully', { position: 'top-left' });
     }
   }
 
-  getProductsByCategory(categoryId: string) {
-    this._productService.getProductsByCategory(categoryId).subscribe((data) => {
-      this.categoryProducts = data;
-    });
+  getProductsByType(type: string) {
+    this._productService.getProductsByType(type).subscribe(
+      (data) => {
+        this.relatedProducts = data.filter((item: any) => item.id !== this.productId); // Exclude the current product
+      },
+      (error) => {
+        console.error('Error loading related products:', error);
+      }
+    );
   }
 
   virtualTryOn(product: any) {
     console.log('Virtual Try-On clicked for product:', product);
-    this._toast.info('Virtual Try-On feature coming soon!',
-      {
-        position: 'top-left'
-      });
+    this._toast.info('Virtual Try-On feature coming soon!', { position: 'top-left' });
   }
 
   ngOnInit(): void {
     this._route.params.subscribe(params => {
       this.productId = params['id'];
-      this.getproduct();
-      this.getCartList();
-      this.getWishList();
+      if (this.productId) {
+        this.getProduct();
+        this.getCartList();
+        this.getWishList();
+      }
     });
   }
 }

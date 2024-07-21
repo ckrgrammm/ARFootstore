@@ -86,13 +86,7 @@
                         <div class="col-md-4 col-6 mb-2">
                             <label class="form-label">Size in US</label>
                             <select class="form-select">
-                                <option>8</option>
-                                <option>9</option>
-                                <option>10</option>
-                                <option>11</option>
-                                <option>12</option>
-                                <option>13</option>
-                                <option>14</option>
+                                <option *ngFor="let size of sizes" [value]="size">{{size}}</option>
                             </select>
                         </div>
                     </div>
@@ -125,7 +119,7 @@
                 <h4 class="text-dark">Related products</h4>
             </div>
             <owl-carousel-o [options]="slider3Settings" #myCarousel>
-                <ng-container class="col-md-2 col-6" *ngFor="let item of categoryProducts">
+                <ng-container class="col-md-2 col-6" *ngFor="let item of relatedProducts">
                     <ng-template carouselSlide>
                         <app-product [product]="item"></app-product>
                     </ng-template>

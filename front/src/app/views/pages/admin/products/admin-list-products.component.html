@@ -1,0 +1,31 @@
+<div class="container mt-5">
+    <h2>Product List</h2>
+    <div *ngIf="isLoading" class="text-center">
+      <p>Loading...</p>
+    </div>
+    <div *ngIf="error" class="text-danger text-center">
+      <p>{{ error }}</p>
+    </div>
+    <table class="table table-bordered table-striped" *ngIf="!isLoading && !error">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <td>{{ product.name }}</td>
+          <td>{{ product.price }}</td>
+          <td>{{ product.description }}</td>
+          <td>
+            <button class="btn btn-primary btn-sm" (click)="editProduct(product.id)">Edit</button>
+            <button class="btn btn-danger btn-sm" (click)="deleteProduct(product.id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

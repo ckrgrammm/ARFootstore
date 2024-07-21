@@ -41,4 +41,12 @@ export class LocalstorageService {
   getEmail(): string | null {
     return this.getItem('email');
   }
+
+  setRoles(roles: string) {
+    this.setItem('roles', roles);
+  }
+
+  getRoles(): string | null {
+    return this.getItem('roles');
+  }
 }

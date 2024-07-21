@@ -4,6 +4,10 @@ import { BaseComponent } from './views/layout/base/base.component';
 import { AuthGuard } from './views/pages/auth/services/auth-guard.service';
 import { ErrorPageComponent } from './views/pages/error-page/error-page.component';
 import { AdminAddProductComponent } from './views/pages/admin/products/admin-add-product.component';
+import { AdminListProductsComponent } from './views/pages/admin/products/admin-list-products.component';
+import { AdminEditProductComponent } from './views/pages/admin/products/admin-edit-product.component';
+
+
 
 const routes: Routes = [
   {
@@ -43,6 +47,16 @@ const routes: Routes = [
         path: 'admin/products/add',
         component: AdminAddProductComponent,
         canActivate: [AuthGuard],  
+      },
+      {
+        path: 'admin/products',
+        component: AdminListProductsComponent, 
+        canActivate: [AuthGuard],  
+      },
+      {
+        path: 'admin/products/edit/:id',
+        component: AdminEditProductComponent,
+        canActivate: [AuthGuard],
       },
       { path: '', redirectTo: 'products', pathMatch: 'full' },
     ]

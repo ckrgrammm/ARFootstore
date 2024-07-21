@@ -162,18 +162,18 @@ app.put('/update-profile', upload.single('profileImage'), async (req, res) => {
 
 app.post('/v1/products', upload.array('images', 4), async (req, res) => {
   const {
-    name, price, description, amount, type, colour, material, brand, size, totalOrdered, stockStatus
+    name, brand, colour, description, material, amount, price, size, stockStatus
   } = req.body;
   const files = req.files;
 
   try {
-    const docRef = await db.collection('products').doc(); // Create a new document reference with an auto-generated ID
+    const docRef = await db.collection('products').doc();
     const productId = docRef.id;
     const imageUrls = [];
 
     if (files) {
       for (const file of files) {
-        const blob = bucket.file(`products/${productId}/${Date.now()}_${file.originalname}`);
+        const blob = bucket.file(`products/${productId}/images/${Date.now()}_${file.originalname}`);
         const blobStream = blob.createWriteStream({
           metadata: {
             contentType: file.mimetype,
@@ -200,20 +200,20 @@ app.post('/v1/products', upload.array('images', 4), async (req, res) => {
 
     const product = {
       name,
-      price: parseFloat(price),
-      description,
-      amount: parseInt(amount, 10),
-      type,
-      colour,
-      material,
       brand,
-      images: imageUrls,
+      colour,
+      description,
+      material,
+      amount: parseInt(amount, 10),
+      price: parseFloat(price),
       size: parseInt(size, 10),
-      totalOrdered: parseInt(totalOrdered, 10),
-      stockStatus,
+      totalOrdered: 0,  
+      stockStatus: stockStatus === 'true' || stockStatus === true,
+      type: 'Shoes',  
+      images: imageUrls,
     };
 
-    await docRef.set(product); // Save the product data using the document reference
+    await docRef.set(product);
 
     res.status(201).json({ message: 'Product added successfully', id: productId, product });
   } catch (error) {
@@ -221,8 +221,6 @@ app.post('/v1/products', upload.array('images', 4), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
-
 
 
 app.get('/v1/products', async (req, res) => {
@@ -274,6 +272,139 @@ app.get('/v1/categories/:categoryId/products', async (req, res) => {
   }
 });
 
+app.delete('/v1/products/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const productRef = db.collection('products').doc(id);
+    const doc = await productRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const product = doc.data();
+    const imageUrls = product.images || [];
+
+    const deletePromises = imageUrls.map(async (url) => {
+      try {
+        const filePath = decodeURIComponent(url.split('/').slice(4).join('/'));
+        const file = bucket.file(filePath);
+        await file.delete();
+      } catch (error) {
+        console.error('Error deleting file from storage:', error);
+        throw new Error(`Failed to delete image: ${error.message}`);
+      }
+    });
+
+    await Promise.all(deletePromises);
+    await productRef.delete();
+
+    res.status(200).json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.put('/v1/products/:id', upload.array('images', 4), async (req, res) => {
+  const { id } = req.params;
+  const {
+    name, price, description, amount, colour, material, brand, size, stockStatus
+  } = req.body;
+  const files = req.files;
+
+  try {
+    const productRef = db.collection('products').doc(id);
+    const doc = await productRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const product = doc.data();
+    let imageUrls = product.images || [];
+
+    if (files && files.length > 0) {
+      const deletePromises = imageUrls.map(async (url) => {
+        try {
+          const filePath = decodeURIComponent(url.split('/').slice(4).join('/'));
+          const file = bucket.file(filePath);
+          await file.delete();
+        } catch (error) {
+          console.error('Error deleting file from storage:', error);
+        }
+      });
+      await Promise.all(deletePromises);
+
+      imageUrls = [];
+      for (const file of files) {
+        const blob = bucket.file(`products/${id}/images/${Date.now()}_${file.originalname}`);
+        const blobStream = blob.createWriteStream({
+          metadata: {
+            contentType: file.mimetype,
+          },
+        });
+
+        await new Promise((resolve, reject) => {
+          blobStream.on('error', (error) => {
+            console.error('Error uploading file:', error);
+            reject(error);
+          });
+
+          blobStream.on('finish', async () => {
+            await blob.makePublic();
+            const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+            imageUrls.push(imageUrl);
+            resolve();
+          });
+
+          blobStream.end(file.buffer);
+        });
+      }
+    }
+
+    const updatedProduct = {
+      name,
+      price: parseFloat(price),
+      description,
+      amount: parseInt(amount, 10),
+      colour,
+      material,
+      brand,
+      images: imageUrls,
+      size: parseInt(size, 10),
+      stockStatus: stockStatus === 'true', // Convert to boolean
+      type: 'shoes', // Always set type to 'shoes'
+      totalOrdered: product.totalOrdered || 0 // Keep the existing totalOrdered value
+    };
+
+    await productRef.update(updatedProduct);
+
+    res.status(200).json({ message: 'Product updated successfully', id, product: updatedProduct });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.get('/v1/products', async (req, res) => {
+  const { type, offset = 0, limit = 10 } = req.query;
+  try {
+    let query = db.collection('products');
+    if (type) {
+      query = query.where('type', '==', type);
+    }
+    const snapshot = await query.get();
+    const allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const products = allProducts.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error listing products:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 app.post('/v1/auth/refresh-token', async (req, res) => {
   const { token } = req.body;
 
@@ -293,6 +424,37 @@ app.post('/v1/auth/refresh-token', async (req, res) => {
     });
   } catch (error) {
     console.error('Error in /v1/auth/refresh-token:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.get('/v1/search', async (req, res) => {
+  const { query, type } = req.query;
+
+  if (!query) {
+    return res.status(400).json({ message: 'Query is required' });
+  }
+
+  try {
+    let productsRef = db.collection('products').where('name', '>=', query).where('name', '<=', query + '\uf8ff');
+
+    if (type) {
+      productsRef = productsRef.where('type', '==', type);
+    }
+
+    const snapshot = await productsRef.get();
+    if (snapshot.empty) {
+      return res.status(404).json({ message: 'No matching products found' });
+    }
+
+    const products = [];
+    snapshot.forEach(doc => {
+      products.push({ id: doc.id, ...doc.data() });
+    });
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error searching products:', error);
     res.status(500).json({ message: error.message });
   }
 });
