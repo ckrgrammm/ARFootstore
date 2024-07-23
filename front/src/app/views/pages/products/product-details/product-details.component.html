@@ -86,6 +86,7 @@
                         <div class="col-md-6 col-6 mb-2">
                             <label class="form-label">Size in US</label>
                             <select class="form-select" (change)="onSizeChange($event)">
+                                <option value="" disabled selected>Select Size</option>
                                 <option *ngFor="let size of product?.sizes" [value]="size.size">{{size.size}}</option>
                             </select>
                         </div>
@@ -95,7 +96,7 @@
                     </div>
                     <a href="#" class="btn btn-warning me-2"
                         (click)="$event.preventDefault(); addProductToCart(product)"
-                        [class.disabled]="!product.stockStatus">
+                        [class.disabled]="!product.stockStatus || !selectedSize || selectedSize.amount === 0">
                         <i class="me-1 fa fa-shopping-basket"></i>
                         {{productInCartList ? 'Added to cart' : 'Add to cart'}}
                     </a>
@@ -135,7 +136,6 @@
     </div>
 </section>
 
-<!-- Modal for 3D Model Inspection -->
 <div class="modal fade" id="inspectModal" tabindex="-1" aria-labelledby="inspectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">

@@ -204,8 +204,8 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   addProductToCart(item: any) {
-    if (!this.product.stockStatus) {
-      this._toast.error('Product is out of stock', { position: 'top-left' });
+    if (!this.product.stockStatus || !this.selectedSize || this.selectedSize.amount === 0) {
+      this._toast.error('Product is out of stock or size is unavailable', { position: 'top-left' });
       return;
     }
     const cartItem: CartItem = {
