@@ -1,78 +1,89 @@
 <div class="container mt-5">
     <h2>Edit Product</h2>
     <form [formGroup]="editProductForm" (ngSubmit)="onSubmit()">
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" formControlName="name">
-            <div *ngIf="isSubmitted && f.name.errors" class="text-danger">
-                Name is required
-            </div>
+      <!-- Other fields remain unchanged -->
+      <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" formControlName="name">
+        <div *ngIf="isSubmitted && f.name.errors" class="text-danger">
+          Name is required
         </div>
-        <div class="mb-3">
-            <label for="brand" class="form-label">Brand</label>
-            <input type="text" class="form-control" id="brand" formControlName="brand">
-            <div *ngIf="isSubmitted && f.brand.errors" class="text-danger">
-                Brand is required
-            </div>
+      </div>
+      <div class="mb-3">
+        <label for="brand" class="form-label">Brand</label>
+        <input type="text" class="form-control" id="brand" formControlName="brand">
+        <div *ngIf="isSubmitted && f.brand.errors" class="text-danger">
+          Brand is required
         </div>
-        <div class="mb-3">
-            <label for="colour" class="form-label">Colour</label>
-            <input type="text" class="form-control" id="colour" formControlName="colour">
-            <div *ngIf="isSubmitted && f.colour.errors" class="text-danger">
-                Colour is required
-            </div>
+      </div>
+      <div class="mb-3">
+        <label for="colour" class="form-label">Colour</label>
+        <input type="text" class="form-control" id="colour" formControlName="colour">
+        <div *ngIf="isSubmitted && f.colour.errors" class="text-danger">
+          Colour is required
         </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea class="form-control" id="description" rows="3" formControlName="description"></textarea>
-            <div *ngIf="isSubmitted && f.description.errors" class="text-danger">
-                Description is required
-            </div>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" rows="3" formControlName="description"></textarea>
+        <div *ngIf="isSubmitted && f.description.errors" class="text-danger">
+          Description is required
         </div>
-        <div class="mb-3">
-            <label for="material" class="form-label">Material</label>
-            <input type="text" class="form-control" id="material" formControlName="material">
-            <div *ngIf="isSubmitted && f.material.errors" class="text-danger">
-                Material is required
-            </div>
+      </div>
+      <div class="mb-3">
+        <label for="material" class="form-label">Material</label>
+        <input type="text" class="form-control" id="material" formControlName="material">
+        <div *ngIf="isSubmitted && f.material.errors" class="text-danger">
+          Material is required
         </div>
-        <div class="mb-3">
-            <label for="amount" class="form-label">Amount</label>
-            <input type="number" class="form-control" id="amount" formControlName="amount">
-            <div *ngIf="isSubmitted && f.amount.errors" class="text-danger">
+      </div>
+      <div class="mb-3">
+        <label for="price" class="form-label">Price</label>
+        <input type="number" step="0.01" class="form-control" id="price" formControlName="price">
+        <div *ngIf="isSubmitted && f.price.errors" class="text-danger">
+          Price is required
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="stockStatus" class="form-label">Stock Status</label>
+        <select class="form-select" id="stockStatus" formControlName="stockStatus">
+          <option [value]="true">In Stock</option>
+          <option [value]="false">Out of Stock</option>
+        </select>
+        <div *ngIf="isSubmitted && f.stockStatus.errors" class="text-danger">
+          Stock Status is required
+        </div>
+      </div>
+      <div formArrayName="sizes">
+        <div *ngFor="let size of sizes.controls; let i = index" [formGroupName]="i" class="mb-3">
+          <div class="row">
+            <div class="col">
+              <label for="size-{{i}}" class="form-label">Size</label>
+              <input type="number" class="form-control" id="size-{{i}}" formControlName="size" placeholder="Size">
+            </div>
+            <div class="col">
+              <label for="amount-{{i}}" class="form-label">Amount</label>
+              <input type="number" class="form-control" id="amount-{{i}}" formControlName="amount" placeholder="Amount">
+              <div *ngIf="isSubmitted && sizes.at(i).get('amount')?.errors" class="text-danger">
                 Amount is required
+              </div>
             </div>
+          </div>
         </div>
-        <div class="mb-3">
-            <label for="price" class="form-label">Price</label>
-            <input type="number" step="0.01" class="form-control" id="price" formControlName="price">
-            <div *ngIf="isSubmitted && f.price.errors" class="text-danger">
-                Price is required
-            </div>
-        </div>
-        <div class="mb-3">
-            <label for="size" class="form-label">Size</label>
-            <select class="form-select" id="size" formControlName="size">
-                <option *ngFor="let size of sizes" [value]="size">{{size}}</option>
-            </select>
-            <div *ngIf="isSubmitted && f.size.errors" class="text-danger">
-                Size is required
-            </div>
-        </div>
-        <div class="mb-3">
-            <label for="stockStatus" class="form-label">Stock Status</label>
-            <select class="form-select" id="stockStatus" formControlName="stockStatus">
-                <option [value]="true">In Stock</option>
-                <option [value]="false">Out of Stock</option>
-            </select>
-            <div *ngIf="isSubmitted && f.stockStatus.errors" class="text-danger">
-                Stock Status is required
-            </div>
-        </div>
-        <div class="mb-3">
-            <label for="images" class="form-label">Images</label>
-            <input type="file" class="form-control" id="images" (change)="onFilesSelected($event)" multiple>
-        </div>
-        <button type="submit" class="btn btn-primary">Update Product</button>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="model3d" formControlName="model3d" (change)="toggle3DModel($event)">
+        <label class="form-check-label" for="model3d">Is this product compatible with 3D model?</label>
+      </div>
+      <div class="mb-3" *ngIf="editProductForm.get('model3d')?.value">
+        <label for="model3dFile" class="form-label">Upload 3D Model (.glb)</label>
+        <input type="file" class="form-control" id="model3dFile" (change)="onModel3DSelected($event)">
+      </div>
+      <div class="mb-3">
+        <label for="images" class="form-label">Images</label>
+        <input type="file" class="form-control" id="images" (change)="onFilesSelected($event)" multiple>
+      </div>
+      <button type="submit" class="btn btn-primary">Update Product</button>
     </form>
-</div>
+  </div>
+  

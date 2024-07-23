@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminProductService } from '../services/admin-product.service';
 import { HotToastService } from '@ngneat/hot-toast';
@@ -13,8 +13,8 @@ import { finalize } from 'rxjs/operators';
 export class AdminEditProductComponent implements OnInit {
   editProductForm!: FormGroup;
   selectedFiles: File[] = [];
+  selectedModel3DFile: File | null = null;
   isSubmitted = false;
-  sizes = [9, 10, 11, 12, 13, 14, 15]; // Sizes for shoes
   productId!: string;
 
   constructor(
@@ -33,25 +33,38 @@ export class AdminEditProductComponent implements OnInit {
       colour: ['', Validators.required],
       description: ['', Validators.required],
       material: ['', Validators.required],
-      amount: [0, Validators.required],
       price: [0, Validators.required],
-      size: ['', Validators.required],
       stockStatus: ['', Validators.required],
-      images: [null]
+      model3d: [false],
+      sizes: this.fb.array([])
     });
 
     this.loadProductData();
+  }
+
+  get sizes(): FormArray {
+    return this.editProductForm.get('sizes') as FormArray;
   }
 
   loadProductData(): void {
     this.adminProductService.getProduct(this.productId).subscribe(
       (data) => {
         this.editProductForm.patchValue(data);
+        this.loadSizes(data.sizes);
       },
       (error) => {
         this.toast.error('Error loading product data: ' + error.message);
       }
     );
+  }
+
+  loadSizes(sizes: any[]): void {
+    sizes.forEach(size => {
+      this.sizes.push(this.fb.group({
+        size: [size.size, Validators.required],
+        amount: [size.amount, Validators.required]
+      }));
+    });
   }
 
   onFilesSelected(event: any): void {
@@ -63,6 +76,22 @@ export class AdminEditProductComponent implements OnInit {
     this.selectedFiles = Array.from(files);
   }
 
+  onModel3DSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file && file.name.endsWith('.glb')) {
+      this.selectedModel3DFile = file;
+    } else {
+      this.toast.error('Please upload a valid .glb file');
+      this.selectedModel3DFile = null;
+    }
+  }
+
+  toggle3DModel(event: any): void {
+    if (!event.target.checked) {
+      this.selectedModel3DFile = null;
+    }
+  }
+
   onSubmit(): void {
     this.isSubmitted = true;
     if (this.editProductForm.invalid) {
@@ -71,12 +100,18 @@ export class AdminEditProductComponent implements OnInit {
 
     const formData = new FormData();
     Object.keys(this.editProductForm.controls).forEach(key => {
-      formData.append(key, this.editProductForm.get(key)?.value);
+      if (key !== 'sizes') {
+        formData.append(key, this.editProductForm.get(key)?.value);
+      }
     });
 
+    formData.append('sizes', JSON.stringify(this.sizes.value));
     this.selectedFiles.forEach(file => {
       formData.append('images', file, file.name);
     });
+    if (this.selectedModel3DFile) {
+      formData.append('files', this.selectedModel3DFile, this.selectedModel3DFile.name);
+    }
 
     formData.append('type', 'Shoes');
 
