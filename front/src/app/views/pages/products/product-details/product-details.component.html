@@ -82,12 +82,15 @@
                         <dd class="col-9">{{product?.brand}}</dd>
                     </dl>
                     <hr>
-                    <div class="row mb-4">
-                        <div class="col-md-4 col-6 mb-2">
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-6 col-6 mb-2">
                             <label class="form-label">Size in US</label>
-                            <select class="form-select">
-                                <option *ngFor="let size of sizes" [value]="size">{{size}}</option>
+                            <select class="form-select" (change)="onSizeChange($event)">
+                                <option *ngFor="let size of product?.sizes" [value]="size.size">{{size.size}}</option>
                             </select>
+                        </div>
+                        <div class="col-md-6 col-6 mb-2" *ngIf="selectedSize">
+                            <p class="mt-4">Available: {{selectedSize.amount}}</p>
                         </div>
                     </div>
                     <a href="#" class="btn btn-warning me-2"
@@ -96,7 +99,11 @@
                         <i class="me-1 fa fa-shopping-basket"></i>
                         {{productInCartList ? 'Added to cart' : 'Add to cart'}}
                     </a>
-                    <a href="#" id="virtualTryOn" class="btn btn-info me-2"
+                    <a href="#" *ngIf="product?.model3d" id="inspectModel" class="btn btn-primary me-2"
+                        (click)="$event.preventDefault(); openInspectModal()">
+                        <i class="fa fa-cube"></i> Inspect
+                    </a>
+                    <a href="#" *ngIf="product?.model3d" id="virtualTryOn" class="btn btn-info me-2"
                         (click)="$event.preventDefault(); virtualTryOn(product)">
                         <i class="fa fa-eye"></i> Virtual Try-On
                     </a>
@@ -105,7 +112,6 @@
                         <i class="fa-regular fa-heart text-danger"></i>
                         Save
                     </a>
-
                     <a href="#" (click)="$event.preventDefault(); addProductToWishList(product)"
                         *ngIf="isProductInWishList" class="btn btn-light me-2">
                         <i class="me-1 fa fa-heart text-danger"></i> Saved
@@ -128,3 +134,20 @@
         </div>
     </div>
 </section>
+
+<!-- Modal for 3D Model Inspection -->
+<div class="modal fade" id="inspectModal" tabindex="-1" aria-labelledby="inspectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inspectModalLabel">3D Model Inspection</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <model-viewer [src]="product?.model3dUrl" alt="3D model" ar ar-modes="webxr scene-viewer quick-look"
+                    environment-image="neutral" auto-rotate camera-controls
+                    style="width: 100%; height: 100%;"></model-viewer>
+            </div>
+        </div>
+    </div>
+</div>

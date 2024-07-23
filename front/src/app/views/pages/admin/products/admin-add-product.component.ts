@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminProductService } from '../services/admin-product.service';
 import { HotToastService } from '@ngneat/hot-toast';
@@ -12,8 +12,8 @@ import { HotToastService } from '@ngneat/hot-toast';
 export class AdminAddProductComponent implements OnInit {
   addProductForm!: FormGroup;
   selectedFiles: File[] = [];
+  selectedModel3DFile: File | null = null;
   isSubmitted = false;
-  sizes = [9, 10, 11, 12, 13, 14, 15]; // Sizes for shoes
 
   constructor(
     private fb: FormBuilder,
@@ -29,12 +29,36 @@ export class AdminAddProductComponent implements OnInit {
       colour: ['', Validators.required],
       description: ['', Validators.required],
       material: ['', Validators.required],
-      amount: [0, Validators.required],
       price: [0, Validators.required],
-      size: ['', Validators.required],
       stockStatus: ['', Validators.required],
-      images: [null]
+      model3d: [false],
+      numSizes: [1, Validators.required],
+      sizes: this.fb.array([])
     });
+
+    this.onNumSizesChange({ target: { value: 1 } });
+  }
+
+  get sizes(): FormArray {
+    return this.addProductForm.get('sizes') as FormArray;
+  }
+
+  onNumSizesChange(event: any): void {
+    const numSizes = event.target.value || 0;
+    if (numSizes < 1) {
+      return;
+    }
+    
+    while (this.sizes.length !== 0) {
+      this.sizes.removeAt(0);
+    }
+
+    for (let i = 0; i < numSizes; i++) {
+      this.sizes.push(this.fb.group({
+        size: ['', Validators.required],
+        amount: [0, Validators.required]
+      }));
+    }
   }
 
   onFilesSelected(event: any): void {
@@ -46,33 +70,53 @@ export class AdminAddProductComponent implements OnInit {
     this.selectedFiles = Array.from(files);
   }
 
+  onModel3DSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file && file.name.endsWith('.glb')) {
+      this.selectedModel3DFile = file;
+    } else {
+      this.toast.error('Please upload a valid .glb file');
+      this.selectedModel3DFile = null;
+    }
+  }
+
+  toggle3DModel(event: any): void {
+    if (!event.target.checked) {
+      this.selectedModel3DFile = null;
+    }
+  }
+
   onSubmit(): void {
     this.isSubmitted = true;
     if (this.addProductForm.invalid) {
       return;
     }
 
-    // Show loading toast
-    const toastRef = this.toast.loading('Adding products...');
-
+    const toastRef = this.toast.loading('Adding product...');
     const formData = new FormData();
     Object.keys(this.addProductForm.controls).forEach(key => {
-      formData.append(key, this.addProductForm.get(key)?.value);
+      if (key !== 'sizes') {
+        formData.append(key, this.addProductForm.get(key)?.value);
+      }
     });
 
+    formData.append('sizes', JSON.stringify(this.sizes.value));
     this.selectedFiles.forEach(file => {
-      formData.append('images', file, file.name);
+      formData.append('files', file, file.name);
     });
+    if (this.selectedModel3DFile) {
+      formData.append('files', this.selectedModel3DFile, this.selectedModel3DFile.name);
+    }
 
     this.adminProductService.addProduct(formData).subscribe(
       response => {
         this.toast.success('Product added successfully');
-        toastRef.close(); // Close the loading toast
+        toastRef.close(); 
         this.router.navigate(['/products']); 
       },
       error => {
         this.toast.error('Error adding product: ' + error.message);
-        toastRef.close(); // Close the loading toast
+        toastRef.close(); 
       }
     );
   }

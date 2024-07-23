@@ -160,9 +160,9 @@ app.put('/update-profile', upload.single('profileImage'), async (req, res) => {
   }
 });
 
-app.post('/v1/products', upload.array('images', 4), async (req, res) => {
+app.post('/v1/products', upload.array('files', 5), async (req, res) => {
   const {
-    name, brand, colour, description, material, amount, price, size, stockStatus
+    name, brand, colour, description, material, price, stockStatus, model3d, sizes
   } = req.body;
   const files = req.files;
 
@@ -170,10 +170,13 @@ app.post('/v1/products', upload.array('images', 4), async (req, res) => {
     const docRef = await db.collection('products').doc();
     const productId = docRef.id;
     const imageUrls = [];
+    let model3dUrl = "";
 
     if (files) {
       for (const file of files) {
-        const blob = bucket.file(`products/${productId}/images/${Date.now()}_${file.originalname}`);
+        const isModel3D = file.mimetype === 'model/gltf-binary' || file.originalname.endsWith('.glb');
+        const directory = isModel3D ? `3dmodel/${productId}` : `products/${productId}/images`;
+        const blob = bucket.file(`${directory}/${Date.now()}_${file.originalname}`);
         const blobStream = blob.createWriteStream({
           metadata: {
             contentType: file.mimetype,
@@ -188,8 +191,12 @@ app.post('/v1/products', upload.array('images', 4), async (req, res) => {
 
           blobStream.on('finish', async () => {
             await blob.makePublic();
-            const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-            imageUrls.push(imageUrl);
+            const fileUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+            if (isModel3D) {
+              model3dUrl = fileUrl;
+            } else {
+              imageUrls.push(fileUrl);
+            }
             resolve();
           });
 
@@ -204,13 +211,14 @@ app.post('/v1/products', upload.array('images', 4), async (req, res) => {
       colour,
       description,
       material,
-      amount: parseInt(amount, 10),
       price: parseFloat(price),
-      size: parseInt(size, 10),
-      totalOrdered: 0,  
       stockStatus: stockStatus === 'true' || stockStatus === true,
-      type: 'Shoes',  
+      type: 'Shoes',
       images: imageUrls,
+      model3d: model3d === 'true' || model3d === true,
+      model3dUrl: model3dUrl || null,  
+      sizes: JSON.parse(sizes),
+      totalOrdered: 0,
     };
 
     await docRef.set(product);
@@ -221,7 +229,6 @@ app.post('/v1/products', upload.array('images', 4), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 app.get('/v1/products', async (req, res) => {
   const { offset = 0, limit = 10 } = req.query;

@@ -1,7 +1,6 @@
-import { NgModule } from '@angular/core';
+import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HotToastModule } from '@ngneat/hot-toast';
 
@@ -19,7 +18,6 @@ import { LocalstorageService } from './views/pages/auth/services/localstorage.se
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from './views/shared/shared.module';
 import { AdminModule } from './views/pages/admin/admin.module'; 
-
 
 @NgModule({
   declarations: [
@@ -40,22 +38,20 @@ import { AdminModule } from './views/pages/admin/admin.module';
     SharedModule,
     HotToastModule.forRoot(),
     AdminModule  
-
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  schemas: [NO_ERRORS_SCHEMA]
 })
 export class AppModule {
-  constructor
-  (
+  constructor(
     private _cartService: CartService,
     private _wishlistService: WishlistService,
     private _authService: AuthService,
     private _localstorageService: LocalstorageService
-  )
-  {
+  ) {
     _wishlistService.initWishlistLocalStorage();
     _cartService.initCartLocalStorage();
     if(_localstorageService.getToken()) {

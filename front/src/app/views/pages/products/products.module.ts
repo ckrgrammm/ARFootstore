@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { CarouselModule } from 'ngx-owl-carousel-o';
@@ -29,6 +29,7 @@ const routes: Routes = [
     ],
   },
 ];
+
 @NgModule({
   declarations: [
     AllProductsComponent,
@@ -44,8 +45,8 @@ const routes: Routes = [
     RouterModule.forChild(routes),
     NgxSkeletonLoaderModule,
     InfiniteScrollModule
-  ]
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA] 
 })
-
 export class ProductsModule {
 }

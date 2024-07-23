@@ -178,3 +178,8 @@
     background-color: #ff8100;
 
 }
+
+.form-select, .mt-4 {
+    display: inline-block;
+    vertical-align: middle;
+}

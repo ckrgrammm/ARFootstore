@@ -9,6 +9,8 @@ import { HotToastService } from '@ngneat/hot-toast';
 import { WishItem } from '../../models/wishlist';
 import { WishlistService } from '../../services/wishlist.service';
 
+declare var bootstrap: any;
+
 @Component({
   selector: 'app-product-details',
   templateUrl: './product-details.component.html',
@@ -16,8 +18,8 @@ import { WishlistService } from '../../services/wishlist.service';
 })
 export class ProductDetailsComponent implements OnInit {
   backgroundPos: string = 'center center';
-  startPosition: number = 0; // Position of active Slide
-  @ViewChild("myCarousel") myCarousel!: ElementRef;  // slider One Big Image
+  startPosition: number = 0;
+  @ViewChild("myCarousel") myCarousel!: ElementRef;
 
   slider1Settings: OwlOptions = {
     loop: true,
@@ -115,7 +117,7 @@ export class ProductDetailsComponent implements OnInit {
   relatedProducts: any;
   isProductInWishList: boolean = false;
   productInCartList: any;
-  sizes: number[] = [9, 10, 11, 12, 13, 14, 15]; // Sizes for shoes
+  selectedSize: any;
 
   constructor(
     private _productService: ProductService,
@@ -145,7 +147,7 @@ export class ProductDetailsComponent implements OnInit {
     this._productService.getSingleProduct(this.productId).subscribe(
       (data) => {
         this.product = data;
-        this.getProductsByType(this.product.type);  // Use type instead of category
+        this.getProductsByType(this.product.type);
         this.productInCartList = this.checkProductInCartList(data);
         this.isProductInWishList = this.productInWishList(data);
         if (data.images.length === 1) {
@@ -230,7 +232,7 @@ export class ProductDetailsComponent implements OnInit {
   getProductsByType(type: string) {
     this._productService.getProductsByType(type).subscribe(
       (data) => {
-        this.relatedProducts = data.filter((item: any) => item.id !== this.productId); // Exclude the current product
+        this.relatedProducts = data.filter((item: any) => item.id !== this.productId);
       },
       (error) => {
         console.error('Error loading related products:', error);
@@ -241,6 +243,16 @@ export class ProductDetailsComponent implements OnInit {
   virtualTryOn(product: any) {
     console.log('Virtual Try-On clicked for product:', product);
     this._toast.info('Virtual Try-On feature coming soon!', { position: 'top-left' });
+  }
+
+  openInspectModal() {
+    const inspectModal = new bootstrap.Modal(document.getElementById('inspectModal'));
+    inspectModal.show();
+  }
+
+  onSizeChange(event: any) {
+    const selectedSizeValue = event.target.value;
+    this.selectedSize = this.product.sizes.find((size: any) => size.size == selectedSizeValue);
   }
 
   ngOnInit(): void {
