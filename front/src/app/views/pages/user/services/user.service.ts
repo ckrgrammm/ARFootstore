@@ -39,4 +39,8 @@ export class UserService {
       })
     );
   }
+  
+  uploadFeetImage(formData: FormData): Observable<any> {
+    return this._http.post<any>(`${environment.api}upload-feet`, formData, this.getHttpOptions());
+  }
 }

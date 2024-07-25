@@ -6,7 +6,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserComponent } from './user.component';
 import { ProfileComponent } from './profile/profile.component';
 import { WishlistComponent } from './wishlist/wishlist.component';
+import { RegisterFeetComponent } from './feet/register-feet.component'; 
 import { SharedModule } from '../../shared/shared.module';
+
 const routes: Routes = [
   {
     path: '',
@@ -25,6 +27,10 @@ const routes: Routes = [
         path: 'wishlist',
         component: WishlistComponent,
       },
+      {
+        path: 'feet',
+        component: RegisterFeetComponent, 
+      },
     ],
   },
 ];
@@ -33,7 +39,8 @@ const routes: Routes = [
   declarations: [
     UserComponent,
     ProfileComponent,
-    WishlistComponent
+    WishlistComponent,
+    RegisterFeetComponent, 
   ],
   imports: [
     CommonModule,
@@ -41,6 +48,6 @@ const routes: Routes = [
     SharedModule,
     ReactiveFormsModule,
     RouterModule.forChild(routes),
-  ]
+  ],
 })
-export class UserModule { }
+export class UserModule {}

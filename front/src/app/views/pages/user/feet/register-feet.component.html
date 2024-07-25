@@ -1,0 +1,25 @@
+<article class="card">
+  <div class="content-body">
+    <div class="row">
+      <div class="col-md-6">
+        <h5 class="title">Left Foot</h5>
+        <input type="file" (change)="onLeftFootFileSelected($event)">
+        <button class="btn btn-primary" (click)="registerLeftFoot()">Register Left Foot</button>
+        <p *ngIf="leftFootSize">Feet size (cm): {{ leftFootSize }}</p>
+      </div>
+      <div class="col-md-6">
+        <h5 class="title">Right Foot</h5>
+        <input type="file" (change)="onRightFootFileSelected($event)">
+        <button class="btn btn-primary" (click)="registerRightFoot()">Register Right Foot</button>
+        <p *ngIf="rightFootSize">Feet size (cm): {{ rightFootSize }}</p>
+      </div>
+    </div>
+    <br>
+    <p class="hint"><i>{{ currentHint }}</i></p>
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <img src="assets/images/ShoeSizeChart.png" alt="Shoe Size Chart" class="img-fluid">
+      </div>
+    </div>
+  </div>
+</article>

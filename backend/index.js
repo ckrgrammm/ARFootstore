@@ -4,9 +4,12 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-
-
+const fs = require('fs');
+const { exec } = require('child_process');
+const path = require('path');
 const { admin, db, bucket } = require('./firebase/firebase');
+
+
 
 const app = express();
 const port = 3000;
@@ -117,7 +120,7 @@ app.put('/update-profile', upload.single('profileImage'), async (req, res) => {
 
     let profileImageUrl = doc.data().profileImage;
     if (file) {
-      const blob = bucket.file(`profiles/${Date.now()}_${file.originalname}`);
+      const blob = bucket.file(`profiles/${email}/picture.png`);
       const blobStream = blob.createWriteStream({
         metadata: {
           contentType: file.mimetype
@@ -130,7 +133,6 @@ app.put('/update-profile', upload.single('profileImage'), async (req, res) => {
       });
 
       blobStream.on('finish', async () => {
-        // Make the file publicly readable
         await blob.makePublic();
         profileImageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
         console.log('Uploaded image URL:', profileImageUrl); 
@@ -159,6 +161,7 @@ app.put('/update-profile', upload.single('profileImage'), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 app.post('/v1/products', upload.array('files', 5), async (req, res) => {
   const {
@@ -462,6 +465,74 @@ app.get('/v1/search', async (req, res) => {
     res.status(200).json(products);
   } catch (error) {
     console.error('Error searching products:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post('/upload-feet', upload.single('feetImage'), async (req, res) => {
+  const { email, foot } = req.body; 
+  const file = req.file;
+
+  if (!email || !file || !foot) {
+    return res.status(400).json({ message: 'Email, foot (left or right), and feet image are required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const fileName = `${foot}_${Date.now()}_${file.originalname}`;
+    const localFilePath = path.join('/Users/apple/workspace/ARFootwear/backend/FeetMeasurement/data', fileName);
+
+    fs.writeFile(localFilePath, file.buffer, async (err) => {
+      if (err) {
+        console.error('Error saving file locally:', err);
+        return res.status(500).json({ message: 'Error saving file locally' });
+      }
+
+      console.log('File saved locally:', localFilePath);
+
+      fs.access(localFilePath, fs.constants.F_OK, (err) => {
+        if (err) {
+          console.error('File does not exist:', localFilePath);
+          return res.status(500).json({ message: 'File does not exist' });
+        }
+
+        const pythonPath = 'python3'; 
+        const scriptPath = path.join('/Users/apple/workspace/ARFootwear/backend/FeetMeasurement', 'main.py');
+
+        exec(`${pythonPath} ${scriptPath} ${localFilePath}`, async (error, stdout, stderr) => {
+          if (error) {
+            console.error('Error executing Python script:', error);
+            return res.status(500).json({ message: 'Error processing feet image' });
+          }
+
+          console.log('Python script output:', stdout.trim());
+
+          const resultLines = stdout.trim().split('\n');
+          const feetSizeLine = resultLines.find(line => line.includes('feet size (cm):'));
+          const feetSize = feetSizeLine ? feetSizeLine.split(':')[1].trim() : 'Unknown';
+
+          try {
+            if (foot === 'left') {
+              await userRef.update({ leftFeet: feetSize });
+            } else if (foot === 'right') {
+              await userRef.update({ rightFeet: feetSize });
+            }
+
+            res.status(200).json({ message: 'Feet image uploaded and processed successfully', feetSize });
+          } catch (updateError) {
+            console.error('Error updating Firestore:', updateError);
+            res.status(500).json({ message: 'Error updating user data in Firestore' });
+          }
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error in /upload-feet:', error);
     res.status(500).json({ message: error.message });
   }
 });

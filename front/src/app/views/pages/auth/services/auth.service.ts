@@ -10,7 +10,6 @@ import { map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AuthService {
-
   private loggedInStatus = new BehaviorSubject<boolean>(this.hasToken());
   loggedInStatus$ = this.loggedInStatus.asObservable();
 
@@ -30,8 +29,11 @@ export class AuthService {
     return this.http.post<any>(`${environment.api}login`, { email, password }).pipe(
       map((user) => {
         this._token.setToken(user.access_token);
-        this._token.setEmail(email); 
-        this._token.setRoles(user.roles); 
+        this._token.setEmail(email);
+        this._token.setRoles(user.roles);
+        this.getUserDetails(email).subscribe((userDetails) => {
+          this._token.setUserDetails(userDetails);
+        });
         this.loggedInStatus.next(true);
         this.startRefreshTokenTimer();
         return user;
@@ -53,7 +55,7 @@ export class AuthService {
   }
 
   logout() {
-    this._token.clear(); 
+    this._token.clear();
     this.loggedInStatus.next(false);
     this.router.navigate(['/products']);
   }
@@ -64,6 +66,27 @@ export class AuthService {
 
   getRoles(): string | null {
     return this._token.getRoles();
+  }
+
+  setFeetSizes(leftFeet: string | null, rightFeet: string | null) {
+    this._token.setFeetSizes(leftFeet, rightFeet);
+  }
+
+  getFeetSizes(): { leftFeet: string | null; rightFeet: string | null } {
+    return this._token.getFeetSizes();
+  }
+
+  getUserDetails(email: string): Observable<any> {
+    return this.http.get<any>(`${environment.api}users/${email}`).pipe(
+      map((user) => {
+        this._token.setUserDetails(user);
+        return user;
+      })
+    );
+  }
+
+  getUserDetailsFromLocalStorage(): any {
+    return this._token.getUserDetails();
   }
 
   refreshToken(): Observable<any> {

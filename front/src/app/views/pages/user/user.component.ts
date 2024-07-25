@@ -36,9 +36,9 @@ export class UserComponent implements OnInit {
   }
 
   logout(event: Event): void {
-    event.preventDefault();  // Prevent the default anchor behavior
+    event.preventDefault();  
 
-    const toastRef = this._toast.loading('Logging you out...');  // Display the loading toast message and get a reference to it
+    const toastRef = this._toast.loading('Logging you out...');  
 
     setTimeout(() => {
       this._auth.logout();  // Use AuthService to handle logout

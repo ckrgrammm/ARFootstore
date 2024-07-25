@@ -109,7 +109,12 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     const email = this._localstorageService.getEmail();
-    if (email) {
+    const userDetails = this._localstorageService.getUserDetails();
+
+    if (userDetails) {
+      this.profile = userDetails;
+      this.initProfileForm();
+    } else if (email) {
       this._userService.getUser(email).subscribe(
         (user) => {
           console.log('Fetched user data:', user);

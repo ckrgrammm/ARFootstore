@@ -4,7 +4,6 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class LocalstorageService {
-
   setItem(key: string, value: any) {
     localStorage.setItem(key, JSON.stringify(value));
   }
@@ -48,5 +47,29 @@ export class LocalstorageService {
 
   getRoles(): string | null {
     return this.getItem('roles');
+  }
+
+  setFeetSizes(leftFeet: string | null, rightFeet: string | null) {
+    if (leftFeet) {
+      this.setItem('leftFeet', leftFeet);
+    }
+    if (rightFeet) {
+      this.setItem('rightFeet', rightFeet);
+    }
+  }
+
+  getFeetSizes(): { leftFeet: string | null, rightFeet: string | null } {
+    return {
+      leftFeet: this.getItem('leftFeet'),
+      rightFeet: this.getItem('rightFeet')
+    };
+  }
+
+  setUserDetails(user: any) {
+    this.setItem('user', user);
+  }
+
+  getUserDetails(): any {
+    return this.getItem('user');
   }
 }
