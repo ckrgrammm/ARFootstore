@@ -1,0 +1,15 @@
+<div class="container mt-5">
+    <h2>View Admin</h2>
+    <div *ngIf="admin">
+      <p><strong>Name:</strong> {{ admin.name }}</p>
+      <p><strong>Email:</strong> {{ admin.email }}</p>
+      <p><strong>Role:</strong> {{ admin.role }}</p>
+    </div>
+    <div *ngIf="isLoading" class="text-center">
+      <p>Loading...</p>
+    </div>
+    <div *ngIf="error" class="text-danger text-center">
+      <p>{{ error }}</p>
+    </div>
+  </div>
+  

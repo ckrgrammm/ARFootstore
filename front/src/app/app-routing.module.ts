@@ -7,6 +7,9 @@ import { AdminListProductsComponent } from './views/pages/admin/products/admin-l
 import { AdminAddProductComponent } from './views/pages/admin/products/admin-add-product.component';
 import { AdminEditProductComponent } from './views/pages/admin/products/admin-edit-product.component';
 import { AdminPanelComponent } from './views/pages/admin/panel/admin-panel.component';
+import { AdminListComponent } from './views/pages/admin/admin/admin-list.component';
+import { AddAdminComponent } from './views/pages/admin/admin/add-admin.component';
+import { EditAdminComponent } from './views/pages/admin/admin/edit-admin.component';
 
 
 const routes: Routes = [
@@ -49,7 +52,9 @@ const routes: Routes = [
         children: [
           // { path: 'dashboard', component: DashboardComponent },
           { path: 'products', component: AdminListProductsComponent },
-          // { path: 'analytics', component: AnalyticsComponent },
+          { path: 'admins', component: AdminListComponent },
+          { path: 'admins/add', component: AddAdminComponent },
+          { path: 'admins/edit/:id', component: EditAdminComponent },
           { path: 'products/add', component: AdminAddProductComponent },
           { path: 'products/edit/:id', component: AdminEditProductComponent },
           { path: '', redirectTo: 'dashboard', pathMatch: 'full' }

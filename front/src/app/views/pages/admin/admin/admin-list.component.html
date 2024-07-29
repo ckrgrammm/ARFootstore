@@ -1,0 +1,33 @@
+<div class="admin-container mt-5">
+  <h2>Admin List</h2>
+  <div class="action-bar text-end mb-3">
+    <button class="btn btn-success" (click)="addAdmin()">Add Admin</button>
+  </div>
+  <div *ngIf="isLoading" class="loading text-center">
+    <p>Loading...</p>
+  </div>
+  <div *ngIf="error" class="error text-danger text-center">
+    <p>{{ error }}</p>
+  </div>
+  <table class="admin-table table table-bordered table-striped" *ngIf="!isLoading && !error">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let admin of admins">
+        <td>{{ admin.name }}</td>
+        <td>{{ admin.email }}</td>
+        <td>{{ admin.roles }}</td>
+        <td class="actions">
+          <button class="btn btn-primary btn-sm" (click)="editAdmin(admin.id)">Edit</button>
+          <button class="btn btn-danger btn-sm" (click)="deleteAdmin(admin.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

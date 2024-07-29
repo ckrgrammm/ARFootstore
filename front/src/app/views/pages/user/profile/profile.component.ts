@@ -119,7 +119,7 @@ export class ProfileComponent implements OnInit {
         (user) => {
           this.profile = user;
           this.initProfileForm();
-          this._localstorageService.setUserDetails(user); // Save user details to local storage
+          this._localstorageService.setUserDetails(user); 
         },
         (error: HttpErrorResponse) => {
           console.error('Error fetching user data:', error);
