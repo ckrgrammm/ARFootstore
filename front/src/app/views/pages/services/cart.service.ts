@@ -34,7 +34,6 @@ export class CartService {
     localStorage.setItem(CART_KEY, initialCartJson);
     this.cart$.next(initialCart);
 
-    // Clear cart on the backend
     const email = this.authService.getEmail();
     if (email) {
       this.updateCartOnServer(initialCart);
@@ -84,8 +83,6 @@ export class CartService {
     localStorage.setItem(CART_KEY, cartJsonString);
 
     this.cart$.next(cart);
-
-    // Update cart on the backend
     this.updateCartOnServer(cart);
   }
 
