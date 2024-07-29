@@ -690,3 +690,202 @@ app.delete('/admins/:id', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+app.post('/update-cart', async (req, res) => {
+  const { email, cart } = req.body;
+
+  if (!email || !cart) {
+    return res.status(400).json({ message: 'Email and cart data are required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    await userRef.update({ cart });
+
+    res.status(200).json({ message: 'Cart updated successfully' });
+  } catch (error) {
+    console.error('Error updating cart:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post('/remove-cart-item', async (req, res) => {
+  const { email, productId } = req.body;
+
+  if (!email || !productId) {
+    return res.status(400).json({ message: 'Email and productId are required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const cart = doc.data().cart || { items: [] };
+    const updatedCartItems = cart.items.filter(item => item.product.id !== productId);
+
+    await userRef.update({ cart: { items: updatedCartItems } });
+
+    res.status(200).json({ message: 'Cart item removed successfully', cart: { items: updatedCartItems } });
+  } catch (error) {
+    console.error('Error removing cart item:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/add-to-wishlist', async (req, res) => {
+  const { email, product } = req.body;
+
+  if (!email || !product) {
+    return res.status(400).json({ message: 'Email and product are required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const wishlist = doc.data().wishlist || { items: [] };
+    wishlist.items.push(product);
+
+    await userRef.update({ wishlist });
+
+    res.status(200).json({ message: 'Product added to wishlist', wishlist });
+  } catch (error) {
+    console.error('Error adding to wishlist:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.post('/remove-from-wishlist', async (req, res) => {
+  const { email, productId } = req.body;
+
+  if (!email || !productId) {
+    return res.status(400).json({ message: 'Email and productId are required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const wishlist = doc.data().wishlist || { items: [] };
+    const updatedWishlistItems = wishlist.items.filter(item => item.id !== productId);
+
+    await userRef.update({ wishlist: { items: updatedWishlistItems } });
+
+    res.status(200).json({ message: 'Product removed from wishlist', wishlist: { items: updatedWishlistItems } });
+  } catch (error) {
+    console.error('Error removing from wishlist:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/add-to-cart', async (req, res) => {
+  const { email, product } = req.body;
+
+  if (!email || !product) {
+    return res.status(400).json({ message: 'Email and product are required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const cart = doc.data().cart || { items: [] };
+    const cartItemExist = cart.items.find(item => item.id === product.id);
+    if (cartItemExist) {
+      cartItemExist.quantity += 1;
+    } else {
+      cart.items.push({ ...product, quantity: 1 });
+    }
+
+    await userRef.update({ cart });
+
+    res.status(200).json({ message: 'Product added to cart', cart });
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/checkout', async (req, res) => {
+  const requiredFields = [
+    'firstName', 'lastName', 'email', 'phone',
+    'city', 'country', 'postalcode', 'zip',
+    'house', 'address', 'cartItems', 'totalPrice', 'orderDate'
+  ];
+
+  const missingFields = requiredFields.filter(field => !req.body[field]);
+
+  if (missingFields.length) {
+    console.log('Missing required fields:', missingFields);
+    return res.status(400).json({
+      message: 'All fields are required',
+      missingFields
+    });
+  }
+
+  try {
+    const orderData = req.body;
+    console.log('Received order data:', orderData);
+
+    const orderRef = db.collection('orders').doc();
+    await orderRef.set(orderData);
+
+    res.status(201).json({ message: 'Order placed successfully' });
+  } catch (error) {
+    console.error('Error placing order:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/update-quantity', async (req, res) => {
+  const { productId, size, quantity } = req.body;
+
+  console.log('Received update-quantity request:', req.body);
+
+  if (!productId || !size || quantity === undefined) {
+    console.log('Missing required fields:', { productId, size, quantity });
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const productRef = db.collection('products').doc(productId);
+    const productDoc = await productRef.get();
+
+    if (!productDoc.exists) {
+      console.log('Product not found:', productId);
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const productData = productDoc.data();
+    const sizeIndex = productData.sizes.findIndex(s => s.size === size);
+
+    if (sizeIndex === -1) {
+      console.log('Size not found:', size);
+      return res.status(404).json({ message: 'Size not found' });
+    }
+
+    productData.sizes[sizeIndex].amount -= quantity;
+
+    console.log(`Updating product ${productId} size ${size} quantity to ${productData.sizes[sizeIndex].amount}`);
+
+    await productRef.update({ sizes: productData.sizes });
+
+    return res.status(200).json({ message: 'Quantity updated successfully' });
+  } catch (error) {
+    console.error('Error updating quantity:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});

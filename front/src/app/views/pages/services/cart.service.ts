@@ -1,34 +1,44 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Cart, CartItem, CartItemDetailed } from '../models/cart';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { Cart, CartItem } from '../models/cart';
+import { AuthService } from '../auth/services/auth.service';
 
 export const CART_KEY = 'cart';
+
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
   cart$: BehaviorSubject<Cart> = new BehaviorSubject(this.getCart());
 
-  constructor() {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   initCartLocalStorage() {
     const cart: Cart = this.getCart();
     if (!cart) {
-      const intialCart = {
+      const initialCart = {
         items: []
       };
-      const intialCartJson = JSON.stringify(intialCart);
-      localStorage.setItem(CART_KEY, intialCartJson);
+      const initialCartJson = JSON.stringify(initialCart);
+      localStorage.setItem(CART_KEY, initialCartJson);
     }
   }
 
   emptyCart() {
-    const intialCart = {
+    const initialCart = {
       items: []
     };
-    const intialCartJson = JSON.stringify(intialCart);
-    localStorage.setItem(CART_KEY, intialCartJson);
-    this.cart$.next(intialCart);
+    const initialCartJson = JSON.stringify(initialCart);
+    localStorage.setItem(CART_KEY, initialCartJson);
+    this.cart$.next(initialCart);
+
+    // Clear cart on the backend
+    const email = this.authService.getEmail();
+    if (email) {
+      this.updateCartOnServer(initialCart);
+    }
   }
 
   getCart(): Cart {
@@ -48,8 +58,6 @@ export class CartService {
           } else {
             item.quantity = item.quantity! + cartItem.quantity!;
           }
-
-          // return item;
         }
       });
     } else {
@@ -59,6 +67,10 @@ export class CartService {
     const cartJson = JSON.stringify(cart);
     localStorage.setItem(CART_KEY, cartJson);
     this.cart$.next(cart);
+
+    // Update cart on the backend
+    this.updateCartOnServer(cart);
+
     return cart;
   }
 
@@ -72,5 +84,18 @@ export class CartService {
     localStorage.setItem(CART_KEY, cartJsonString);
 
     this.cart$.next(cart);
+
+    // Update cart on the backend
+    this.updateCartOnServer(cart);
+  }
+
+  private updateCartOnServer(cart: Cart) {
+    const email = this.authService.getEmail();
+    if (email) {
+      this.http.post(`${environment.api}update-cart`, { email, cart }).subscribe(
+        response => console.log('Cart updated on server:', response),
+        error => console.error('Error updating cart on server:', error)
+      );
+    }
   }
 }

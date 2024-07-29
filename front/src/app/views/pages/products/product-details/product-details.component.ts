@@ -188,20 +188,24 @@ export class ProductDetailsComponent implements OnInit {
     return this.WishItems.some((item) => item.product.id === product.id);
   }
 
-  updateCartItemQuantity(value: number, product: any, operation: string) {
-    if (operation === "+") {
+  updateCartItemQuantity(value: number, cartItem: CartItem, operation: string) {
+    if (operation == "+") {
       value++;
     } else {
       value--;
     }
-    this._cartService.setCartItem(
-      {
-        product: product,
-        quantity: value,
-      },
-      true
-    );
+    const updatedCartItem = {
+      product: cartItem.product,
+      quantity: value,
+    };
+  
+    this._cartService.setCartItem(updatedCartItem, true);
   }
+  
+  deleteCartItem(productId: string) {
+    this._cartService.deleteCartItem(productId);
+  }
+  
 
   addProductToCart(item: any) {
     if (!this.product.stockStatus || !this.selectedSize || this.selectedSize.amount === 0) {

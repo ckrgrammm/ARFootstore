@@ -16,7 +16,7 @@ const routes: Routes = [
         component: CheckoutPageComponent,
       },
       {
-        path: 'succuss',
+        path: 'success',
         component: CheckoutCompleteComponent,
       }
     ],

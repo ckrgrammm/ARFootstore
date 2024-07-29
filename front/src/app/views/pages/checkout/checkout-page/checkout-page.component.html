@@ -1,4 +1,3 @@
-
 <div class="empty-cart" *ngIf="isCartEmpty">
     <div class="empty-cart__icon">
         <svg class="empty-img-default" width="184" height="152" viewBox="0 0 184 152"
@@ -152,11 +151,21 @@
 
                                 <div class="col-sm-4 mb-3">
                                     <label for="" class="form-label">City*</label>
-                                    <select class="form-select" id="city*" aria-label="City*">
-                                        <option value="1">New York</option>
-                                        <option value="2">Moscow</option>
-                                        <option value="3">Samarqand</option>
+                                    <select class="form-select" id="city*" formControlName="city" aria-label="City*">
+                                        <option value="New York">New York</option>
+                                        <option value="Moscow">Moscow</option>
+                                        <option value="Samarqand">Samarqand</option>
                                     </select>
+                                </div>
+
+                                <div class="col-sm-4 mb-3">
+                                    <label for="" class="form-label">Country*</label>
+                                    <input type="text" class="form-control" placeholder="Type here"
+                                        formControlName="country">
+                                    <small *ngIf="checkoutForm?.country?.invalid && isSubmitted"
+                                        class="d-block text-danger">
+                                        Country is required
+                                    </small>
                                 </div>
 
                                 <div class="col-sm-4 mb-3">
@@ -183,7 +192,8 @@
                                     <label for="" class="form-label">Zip</label>
                                     <input type="text" class="form-control" placeholder=" Type here"
                                         formControlName="zip">
-                                    <small *ngIf="checkoutForm?.zip?.invalid && isSubmitted" class=" d-block text-danger">
+                                    <small *ngIf="checkoutForm?.zip?.invalid && isSubmitted"
+                                        class=" d-block text-danger">
                                         Zip is required
                                     </small>
                                 </div>

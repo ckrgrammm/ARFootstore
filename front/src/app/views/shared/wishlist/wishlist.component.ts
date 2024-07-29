@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HotToastService } from '@ngneat/hot-toast';
 import { CartItem } from '../../pages/models/cart';
-import { WishItem} from '../../pages/models/wishlist';
+import { WishItem } from '../../pages/models/wishlist';
 import { CartService } from '../../pages/services/cart.service';
 import { WishlistService } from '../../pages/services/wishlist.service';
 
@@ -18,24 +18,22 @@ export class WishlistComponent implements OnInit {
   cartList!: CartItem[];
   isVisable: boolean = false;
   deleteProductId!: string;
-  constructor
-  (
+
+  constructor(
     private _wishlistService: WishlistService,
     private _cartService: CartService,
-    private _toast:HotToastService,
-    private router: Router,
+    private _toast: HotToastService,
+    private router: Router
+  ) {}
 
-  ){}
-    
   openWishList() {
     this.opanWishList = true;
-    document.body.style.overflowY ="hidden";
+    document.body.style.overflowY = "hidden";
   }
-    
 
   closeSidebar() {
     this.opanWishList = false;
-    document.body.style.overflowY ="auto";
+    document.body.style.overflowY = "auto";
   }
 
   getWishList() {
@@ -43,7 +41,6 @@ export class WishlistComponent implements OnInit {
       this.WishItems = cart.items!;
     });
   }
-  
 
   getCartList() {
     this._cartService.cart$.subscribe((cart) => {
@@ -51,36 +48,41 @@ export class WishlistComponent implements OnInit {
     });
   }
 
-
   deleteWishItem() {
     this._wishlistService.deleteWishItem(this.deleteProductId);
     this.closeCofirmModal();
-    this._toast.error('Product removed from wishlist',
-    {
+    this._toast.error('Product removed from wishlist', {
       position: 'top-left'
     });
   }
 
-
-  productInCartList(product: any){
+  productInCartList(product: any) {
     const cartItemExist = this.cartList.find((item) => item.product.id === product.product.id);
     return cartItemExist;
   }
 
   addProductToCart(item: any) {
-    console.log(item)
     const cartItem: CartItem = {
       product: item,
       quantity: 1
     };
     this._cartService.setCartItem(cartItem);
-    
-    this._toast.success('Product added to cart successfully',
-    {
-      position: 'top-left'
-    });
+
+    this._wishlistService.addProductToCartFromWishlist(item)?.subscribe(
+      response => {
+        this._toast.success('Product added to cart successfully', {
+          position: 'top-left'
+        });
+      },
+      error => {
+        console.error('Error adding product to cart from wishlist:', error);
+        this._toast.error('Error adding product to cart', {
+          position: 'top-left'
+        });
+      }
+    );
   }
-  
+
   navigateToProductDetails(productId: string) {
     this.closeSidebar();
     this.router.navigate(['/products', productId]);
@@ -88,7 +90,7 @@ export class WishlistComponent implements OnInit {
 
   openCofirmModal(productId: string) {
     this.isVisable = true;
-    this.deleteProductId = productId
+    this.deleteProductId = productId;
   }
 
   closeCofirmModal() {
@@ -102,5 +104,4 @@ export class WishlistComponent implements OnInit {
     this.getCartList();
     this.getWishList();
   }
-
 }

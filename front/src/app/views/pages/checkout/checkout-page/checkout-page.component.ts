@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartItem } from '../../models/cart';
 import { CartService } from '../../services/cart.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-checkout-page',
@@ -21,6 +23,7 @@ export class CheckoutPageComponent implements OnInit {
     private router: Router,
     private _cartService: CartService,
     private formBuilder: FormBuilder,
+    private http: HttpClient
   ) { }
 
   getCartList() {
@@ -42,15 +45,14 @@ export class CheckoutPageComponent implements OnInit {
     });
   }
 
-
   initCheckoutForm() {
     this.checkoutFormGroup = this.formBuilder.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.email, Validators.required]],
       phone: ['', Validators.required],
-      // city: ['', Validators.required],
-      // country: ['', Validators.required],
+      city: ['', Validators.required],
+      country: ['', Validators.required],
       postalcode: ['', Validators.required],
       message: [''],
       zip: ['', Validators.required],
@@ -59,18 +61,55 @@ export class CheckoutPageComponent implements OnInit {
     });
   }
 
-
   get checkoutForm() {
     return this.checkoutFormGroup.controls;
   }
+
   placeOrder() {
     this.isSubmitted = true;
     if (this.checkoutFormGroup.invalid) {
       return;
     }
 
-    this.router.navigate(['/checkout/succuss'])
-    console.log(this.checkoutForm)
+    const orderData = {
+      ...this.checkoutFormGroup.value,
+      cartItems: this.cartList.map(item => ({
+        productId: item.product.id,
+        size: item.product.size, // Assuming each product has a 'size' attribute
+        quantity: item.quantity
+      })),
+      totalPrice: this.totalPrice,
+      orderDate: new Date().toISOString()
+    };
+
+    this.http.post(`${environment.api}checkout`, orderData).subscribe(
+      response => {
+        this.router.navigate(['/checkout/success']);
+        this.updateProductQuantities(orderData.cartItems);
+      },
+      error => {
+        console.error('Order placement error', error);
+      }
+    );
+  }
+
+  updateProductQuantities(cartItems: any[]) {
+    cartItems.forEach(item => {
+      const updatePayload = {
+        productId: item.productId,
+        size: item.size,
+        quantity: item.quantity
+      };
+
+      this.http.post(`${environment.api}update-quantity`, updatePayload).subscribe(
+        response => {
+          console.log('Quantity updated successfully', response);
+        },
+        error => {
+          console.error('Error updating quantity', error);
+        }
+      );
+    });
   }
 
   ngOnInit(): void {
@@ -78,6 +117,4 @@ export class CheckoutPageComponent implements OnInit {
     this.getTotalPrice();
     this.initCheckoutForm();
   }
-
-
 }
