@@ -3,10 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { BaseComponent } from './views/layout/base/base.component';
 import { AuthGuard } from './views/pages/auth/services/auth-guard.service';
 import { ErrorPageComponent } from './views/pages/error-page/error-page.component';
-import { AdminAddProductComponent } from './views/pages/admin/products/admin-add-product.component';
 import { AdminListProductsComponent } from './views/pages/admin/products/admin-list-products.component';
+import { AdminAddProductComponent } from './views/pages/admin/products/admin-add-product.component';
 import { AdminEditProductComponent } from './views/pages/admin/products/admin-edit-product.component';
-
+import { AdminPanelComponent } from './views/pages/admin/panel/admin-panel.component';
 
 
 const routes: Routes = [
@@ -44,21 +44,20 @@ const routes: Routes = [
           ),
       },
       {
-        path: 'admin/products/add',
-        component: AdminAddProductComponent,
-        canActivate: [AuthGuard],  
-      },
-      {
-        path: 'admin/products',
-        component: AdminListProductsComponent, 
-        canActivate: [AuthGuard],  
-      },
-      {
-        path: 'admin/products/edit/:id',
-        component: AdminEditProductComponent,
+        path: 'admin',
+        component: AdminPanelComponent,
+        children: [
+          // { path: 'dashboard', component: DashboardComponent },
+          { path: 'products', component: AdminListProductsComponent },
+          // { path: 'analytics', component: AnalyticsComponent },
+          { path: 'products/add', component: AdminAddProductComponent },
+          { path: 'products/edit/:id', component: AdminEditProductComponent },
+          { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+        ],
         canActivate: [AuthGuard],
+        
       },
-      { path: '', redirectTo: 'products', pathMatch: 'full' },
+      { path: '', redirectTo: '/admin/dashboard', pathMatch: 'full' }
     ]
   },
   {
@@ -78,7 +77,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes , { scrollPositionRestoration: 'enabled' })],
+  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

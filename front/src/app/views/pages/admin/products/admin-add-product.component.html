@@ -82,6 +82,10 @@
       <label for="model3dFile" class="form-label">Upload 3D Model (.glb)</label>
       <input type="file" class="form-control" id="model3dFile" (change)="onModel3DSelected($event)">
     </div>
+    <div class="mb-3" *ngIf="addProductForm.get('model3d')?.value">
+      <label for="arQr" class="form-label">Upload AR QR Code</label>
+      <input type="file" class="form-control" id="arQr" (change)="onArQrSelected($event)">
+    </div>
     <div class="mb-3">
       <label for="images" class="form-label">Images</label>
       <input type="file" class="form-control" id="images" (change)="onFilesSelected($event)" multiple>

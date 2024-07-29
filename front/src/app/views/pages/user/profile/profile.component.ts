@@ -4,7 +4,6 @@ import { UserService } from '../services/user.service';
 import { LocalstorageService } from '../../auth/services/localstorage.service';
 import { HotToastService } from '@ngneat/hot-toast';
 import { HttpErrorResponse } from '@angular/common/http';
-import { UserProfileService } from '../../../shared/user/user-profile.service';
 
 @Component({
   selector: 'app-profile',
@@ -23,8 +22,7 @@ export class ProfileComponent implements OnInit {
     private _formBuilder: FormBuilder,
     private _userService: UserService,
     private _localstorageService: LocalstorageService,
-    private _toast: HotToastService,
-    private _userProfileService: UserProfileService
+    private _toast: HotToastService
   ) {}
 
   initProfileForm() {
@@ -85,12 +83,10 @@ export class ProfileComponent implements OnInit {
       })
     ).subscribe(
       (response) => {
-        console.log('Profile update response:', response);
-        this.profile.profileImage = response.profileImage; // Update profile image URL
-        console.log('Updated profile image URL:', this.profile.profileImage); // Log the image URL
+        this.updateLocalStorageProfile(response); // Update local storage with new profile data
+        this.profile = { ...this.profile, ...response }; // Update the profile object with new data
         this.isVisable = false;
         this.isSubmitted = false;
-        this.ngOnInit(); // Refresh profile data after update
       },
       (error: HttpErrorResponse) => {
         this.isSubmitted = false;
@@ -108,6 +104,10 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadUserProfile();
+  }
+
+  loadUserProfile() {
     const email = this._localstorageService.getEmail();
     const userDetails = this._localstorageService.getUserDetails();
 
@@ -117,9 +117,9 @@ export class ProfileComponent implements OnInit {
     } else if (email) {
       this._userService.getUser(email).subscribe(
         (user) => {
-          console.log('Fetched user data:', user);
           this.profile = user;
           this.initProfileForm();
+          this._localstorageService.setUserDetails(user); // Save user details to local storage
         },
         (error: HttpErrorResponse) => {
           console.error('Error fetching user data:', error);
@@ -128,5 +128,11 @@ export class ProfileComponent implements OnInit {
     } else {
       console.error('Email is not available in local storage.');
     }
+  }
+
+  updateLocalStorageProfile(updatedProfile: any) {
+    const currentProfile = this._localstorageService.getUserDetails();
+    const newProfile = { ...currentProfile, ...updatedProfile };
+    this._localstorageService.setUserDetails(newProfile);
   }
 }

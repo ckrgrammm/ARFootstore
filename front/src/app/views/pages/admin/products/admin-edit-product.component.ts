@@ -14,6 +14,7 @@ export class AdminEditProductComponent implements OnInit {
   editProductForm!: FormGroup;
   selectedFiles: File[] = [];
   selectedModel3DFile: File | null = null;
+  selectedArQrFile: File | null = null; // New field for AR QR file
   isSubmitted = false;
   productId!: string;
 
@@ -86,9 +87,20 @@ export class AdminEditProductComponent implements OnInit {
     }
   }
 
+  onArQrSelected(event: any): void { // New method to handle AR QR file selection
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedArQrFile = file;
+    } else {
+      this.toast.error('Please upload a valid AR QR file');
+      this.selectedArQrFile = null;
+    }
+  }
+
   toggle3DModel(event: any): void {
     if (!event.target.checked) {
       this.selectedModel3DFile = null;
+      this.selectedArQrFile = null; // Reset AR QR file if 3D model is unchecked
     }
   }
 
@@ -111,6 +123,9 @@ export class AdminEditProductComponent implements OnInit {
     });
     if (this.selectedModel3DFile) {
       formData.append('files', this.selectedModel3DFile, this.selectedModel3DFile.name);
+    }
+    if (this.selectedArQrFile) { // Append AR QR file to form data
+      formData.append('arQr', this.selectedArQrFile, this.selectedArQrFile.name);
     }
 
     formData.append('type', 'Shoes');

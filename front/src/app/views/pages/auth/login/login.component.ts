@@ -61,7 +61,7 @@ export class LoginComponent implements OnInit {
         this._userService.getUser(email).subscribe(
           (userDetails: any) => {
             this._userProfileService.setProfileData(userDetails);
-            this._router.navigate(['/']);
+            this._router.navigate(['/products']);
           },
           (error: any) => {
             console.error('Failed to fetch user details:', error);

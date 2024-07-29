@@ -163,17 +163,19 @@ app.put('/update-profile', upload.single('profileImage'), async (req, res) => {
 });
 
 
-app.post('/v1/products', upload.array('files', 5), async (req, res) => {
+app.post('/v1/products', upload.fields([{ name: 'files', maxCount: 5 }, { name: 'arQr', maxCount: 1 }]), async (req, res) => {
   const {
     name, brand, colour, description, material, price, stockStatus, model3d, sizes
   } = req.body;
-  const files = req.files;
+  const files = req.files.files;
+  const arQrFile = req.files.arQr ? req.files.arQr[0] : null;
 
   try {
     const docRef = await db.collection('products').doc();
     const productId = docRef.id;
     const imageUrls = [];
     let model3dUrl = "";
+    let arQrUrl = "";
 
     if (files) {
       for (const file of files) {
@@ -208,6 +210,31 @@ app.post('/v1/products', upload.array('files', 5), async (req, res) => {
       }
     }
 
+    if (arQrFile) {
+      const qrDirectory = `products/${productId}/QR`;
+      const qrBlob = bucket.file(`${qrDirectory}/${Date.now()}_${arQrFile.originalname}`);
+      const qrBlobStream = qrBlob.createWriteStream({
+        metadata: {
+          contentType: arQrFile.mimetype,
+        },
+      });
+
+      await new Promise((resolve, reject) => {
+        qrBlobStream.on('error', (error) => {
+          console.error('Error uploading AR QR file:', error);
+          reject(error);
+        });
+
+        qrBlobStream.on('finish', async () => {
+          await qrBlob.makePublic();
+          arQrUrl = `https://storage.googleapis.com/${bucket.name}/${qrBlob.name}`;
+          resolve();
+        });
+
+        qrBlobStream.end(arQrFile.buffer);
+      });
+    }
+
     const product = {
       name,
       brand,
@@ -219,7 +246,8 @@ app.post('/v1/products', upload.array('files', 5), async (req, res) => {
       type: 'Shoes',
       images: imageUrls,
       model3d: model3d === 'true' || model3d === true,
-      model3dUrl: model3dUrl || null,  
+      model3dUrl: model3dUrl || null,
+      arQrUrl: arQrUrl || null,  
       sizes: JSON.parse(sizes),
       totalOrdered: 0,
     };
@@ -232,6 +260,7 @@ app.post('/v1/products', upload.array('files', 5), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 app.get('/v1/products', async (req, res) => {
   const { offset = 0, limit = 10 } = req.query;
@@ -317,12 +346,13 @@ app.delete('/v1/products/:id', async (req, res) => {
   }
 });
 
-app.put('/v1/products/:id', upload.array('images', 4), async (req, res) => {
+app.put('/v1/products/:id', upload.fields([{ name: 'images', maxCount: 4 }, { name: 'arQr', maxCount: 1 }]), async (req, res) => {
   const { id } = req.params;
   const {
     name, price, description, amount, colour, material, brand, size, stockStatus
   } = req.body;
-  const files = req.files;
+  const files = req.files.images;
+  const arQrFile = req.files.arQr ? req.files.arQr[0] : null;
 
   try {
     const productRef = db.collection('products').doc(id);
@@ -334,8 +364,10 @@ app.put('/v1/products/:id', upload.array('images', 4), async (req, res) => {
 
     const product = doc.data();
     let imageUrls = product.images || [];
+    let arQrUrl = product.arQrUrl || '';
 
     if (files && files.length > 0) {
+      // Delete existing images
       const deletePromises = imageUrls.map(async (url) => {
         try {
           const filePath = decodeURIComponent(url.split('/').slice(4).join('/'));
@@ -374,6 +406,31 @@ app.put('/v1/products/:id', upload.array('images', 4), async (req, res) => {
       }
     }
 
+    if (arQrFile) {
+      const qrDirectory = `products/${id}/QR`;
+      const qrBlob = bucket.file(`${qrDirectory}/${Date.now()}_${arQrFile.originalname}`);
+      const qrBlobStream = qrBlob.createWriteStream({
+        metadata: {
+          contentType: arQrFile.mimetype,
+        },
+      });
+
+      await new Promise((resolve, reject) => {
+        qrBlobStream.on('error', (error) => {
+          console.error('Error uploading AR QR file:', error);
+          reject(error);
+        });
+
+        qrBlobStream.on('finish', async () => {
+          await qrBlob.makePublic();
+          arQrUrl = `https://storage.googleapis.com/${bucket.name}/${qrBlob.name}`;
+          resolve();
+        });
+
+        qrBlobStream.end(arQrFile.buffer);
+      });
+    }
+
     const updatedProduct = {
       name,
       price: parseFloat(price),
@@ -383,10 +440,11 @@ app.put('/v1/products/:id', upload.array('images', 4), async (req, res) => {
       material,
       brand,
       images: imageUrls,
+      arQrUrl: arQrUrl || product.arQrUrl, 
       size: parseInt(size, 10),
-      stockStatus: stockStatus === 'true', // Convert to boolean
-      type: 'shoes', // Always set type to 'shoes'
-      totalOrdered: product.totalOrdered || 0 // Keep the existing totalOrdered value
+      stockStatus: stockStatus === 'true', 
+      type: 'shoes', 
+      totalOrdered: product.totalOrdered || 0 
     };
 
     await productRef.update(updatedProduct);
@@ -397,6 +455,7 @@ app.put('/v1/products/:id', upload.array('images', 4), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 app.get('/v1/products', async (req, res) => {
   const { type, offset = 0, limit = 10 } = req.query;
@@ -533,6 +592,101 @@ app.post('/upload-feet', upload.single('feetImage'), async (req, res) => {
     });
   } catch (error) {
     console.error('Error in /upload-feet:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
+
+
+// Create Admin
+app.post('/admins', async (req, res) => {
+  const { name, email, password, roles = 'admin' } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (doc.exists) {
+      return res.status(400).json({ message: 'Admin already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await userRef.set({
+      name,
+      email,
+      password: hashedPassword,
+      roles,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.status(201).json({ message: 'Admin created successfully' });
+  } catch (error) {
+    console.error('Error creating admin:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get All Admins
+app.get('/admins', async (req, res) => {
+  try {
+    const snapshot = await db.collection('users').where('roles', '==', 'admin').get();
+    const admins = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.status(200).json(admins);
+  } catch (error) {
+    console.error('Error getting admins:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get Admin by ID
+app.get('/admins/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const adminRef = db.collection('users').doc(id);
+    const doc = await adminRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+    res.status(200).json({ id: doc.id, ...doc.data() });
+  } catch (error) {
+    console.error('Error getting admin:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update Admin
+app.put('/admins/:id', async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  try {
+    const adminRef = db.collection('users').doc(id);
+    await adminRef.update(updateData);
+    const updatedAdmin = await adminRef.get();
+    res.status(200).json({ message: 'Admin updated successfully', admin: { id: updatedAdmin.id, ...updatedAdmin.data() } });
+  } catch (error) {
+    console.error('Error updating admin:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete Admin
+app.delete('/admins/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const adminRef = db.collection('users').doc(id);
+    await adminRef.delete();
+    res.status(200).json({ message: 'Admin deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting admin:', error);
     res.status(500).json({ message: error.message });
   }
 });

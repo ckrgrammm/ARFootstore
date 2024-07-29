@@ -1,6 +1,3 @@
-.content {
-    padding: 25px;
-}
 @media only screen and (max-width: 767px) {
     .content {
         padding: 0px;

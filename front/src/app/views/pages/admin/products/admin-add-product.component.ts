@@ -13,6 +13,7 @@ export class AdminAddProductComponent implements OnInit {
   addProductForm!: FormGroup;
   selectedFiles: File[] = [];
   selectedModel3DFile: File | null = null;
+  selectedArQrFile: File | null = null;
   isSubmitted = false;
 
   constructor(
@@ -80,9 +81,20 @@ export class AdminAddProductComponent implements OnInit {
     }
   }
 
+  onArQrSelected(event: any): void { 
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedArQrFile = file;
+    } else {
+      this.toast.error('Please upload a valid AR QR file');
+      this.selectedArQrFile = null;
+    }
+  }
+
   toggle3DModel(event: any): void {
     if (!event.target.checked) {
       this.selectedModel3DFile = null;
+      this.selectedArQrFile = null;
     }
   }
 
@@ -106,6 +118,9 @@ export class AdminAddProductComponent implements OnInit {
     });
     if (this.selectedModel3DFile) {
       formData.append('files', this.selectedModel3DFile, this.selectedModel3DFile.name);
+    }
+    if (this.selectedArQrFile) {
+      formData.append('arQr', this.selectedArQrFile, this.selectedArQrFile.name);
     }
 
     this.adminProductService.addProduct(formData).subscribe(

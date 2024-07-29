@@ -24,9 +24,13 @@
               <i class="fa-solid fa-right-to-bracket"></i>
               <span>Login</span>
             </a>
-            <a routerLink="/admin/products/add" *ngIf="isAdmin">
+            <a routerLink="/admin" *ngIf="isAdmin">
               <i class="fa-solid fa-user-shield"></i>
               <span>Admin</span>
+            </a>
+            <a (click)="navigateToHome()" *ngIf="isAdminRoute">
+              <i class="fa-solid fa-house"></i>
+              <span>Home</span>
             </a>
             <a routerLink="/user" *ngIf="loggedIn" class="d-flex userProfile-Link">
               <img [src]="profileImage" class="d-inline rounded-circle" width="32" height="32" alt="avatar">
@@ -37,7 +41,7 @@
       </div>
     </div>
   </div>
-  <div class="header-bottom header-bottom-one header-sticky" #headerSticky [class.is-sticky]="sticky">
+  <div class="header-bottom header-bottom-one header-sticky" #headerSticky [class.is-sticky]="sticky" *ngIf="!isAdminRoute">
     <div class="container">
       <div class="row align-items-center justify-content-between">
         <div class="col-lg-2 col-sm-8 col-8 mt-15 mb-15">

@@ -1,10 +1,11 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { Router, ActivatedRoute, Event, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { AuthService } from '../../pages/auth/services/auth.service';
 import { ProductService } from '../../pages/products/services/product.service';
 import { CartService } from '../../pages/services/cart.service';
 import { WishlistService } from '../../pages/services/wishlist.service';
-import { UserProfileService } from '../../shared/user/user-profile.service'; 
-import { Router } from '@angular/router';
+import { UserProfileService } from '../../shared/user/user-profile.service';
 
 @Component({
   selector: 'app-header',
@@ -20,10 +21,11 @@ export class HeaderComponent implements OnInit {
   profileImage: string | null = null;
   user: any = null;
   isAdmin: boolean = false;
+  isAdminRoute: boolean = false; // New boolean flag for admin route
 
   searchQuery: string = '';
   searchResults: any[] = [];
-  showResults: boolean = false; 
+  showResults: boolean = false;
 
   constructor(
     private _cartService: CartService,
@@ -31,8 +33,15 @@ export class HeaderComponent implements OnInit {
     private _wishlistService: WishlistService,
     private _userProfileService: UserProfileService,
     private _productService: ProductService,
-    private _router: Router
-  ) { }
+    private _router: Router,
+    private _activatedRoute: ActivatedRoute
+  ) {
+    this._router.events.pipe(
+      filter((event: Event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.checkIfAdminRoute(event.urlAfterRedirects);
+    });
+  }
 
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
@@ -79,7 +88,11 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  logout(event: Event): void {
+  checkIfAdminRoute(url: string): void {
+    this.isAdminRoute = url.startsWith('/admin');
+  }
+
+  logout(event: MouseEvent): void {
     event.preventDefault();
     this._auth.logout();
     this._userProfileService.clearProfileData();
@@ -95,7 +108,7 @@ export class HeaderComponent implements OnInit {
       this._productService.searchProducts(this.searchQuery.trim()).subscribe(
         (results) => {
           this.searchResults = results;
-          this.showResults = true; // Show search results
+          this.showResults = true; 
           console.log('Search results:', this.searchResults);
         },
         (error) => {
@@ -107,6 +120,10 @@ export class HeaderComponent implements OnInit {
 
   navigateToProduct(productId: string): void {
     this._router.navigate(['/products', productId]);
-    this.showResults = false; 
+    this.showResults = false;
+  }
+
+  navigateToHome(): void { 
+    this._router.navigate(['/products']);
   }
 }

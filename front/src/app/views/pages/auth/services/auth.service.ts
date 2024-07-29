@@ -41,6 +41,25 @@ export class AuthService {
     );
   }
 
+  updateProfile(email: string, profileData: any): Observable<any> {
+    const formData: FormData = new FormData();
+    for (const key in profileData) {
+      if (profileData.hasOwnProperty(key)) {
+        formData.append(key, profileData[key]);
+      }
+    }
+  
+    return this.http.put<any>(`${environment.api}update-profile`, formData).pipe(
+      map((response) => {
+        this.getUserDetails(email).subscribe((userDetails) => {
+          this._token.setUserDetails(userDetails);
+        });
+        return response;
+      })
+    );
+  }
+  
+
   register(name: string, email: string, password: string): Observable<any> {
     return this.http.post<any>(`${environment.api}register`, { name, email, password });
   }

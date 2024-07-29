@@ -16,7 +16,7 @@ export class AdminListProductsComponent implements OnInit {
   constructor(
     private adminProductService: AdminProductService,
     private toast: HotToastService,
-    private router: Router // Inject Router
+    private router: Router 
   ) { }
 
   ngOnInit(): void {
@@ -36,8 +36,12 @@ export class AdminListProductsComponent implements OnInit {
     );
   }
 
+  addProduct(): void {
+    this.router.navigate(['/admin/products/add']); 
+  }
+
   editProduct(id: string): void {
-    this.router.navigate(['/admin/products/edit', id]); // Navigate to edit page
+    this.router.navigate(['/admin/products/edit', id]); 
   }
 
   deleteProduct(id: string): void {
