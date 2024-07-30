@@ -11,10 +11,8 @@ const firebaseConfig = {
   appId: "1:1002163098877:web:d48b6fb8378757e90a5a94"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Admin
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: "footweararsystem.appspot.com",

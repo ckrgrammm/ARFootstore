@@ -37,16 +37,16 @@ export class AllProductsComponent implements OnInit {
   getAllProducts(offset: number, limit: number) {
     this.Loading = true;
     this._product.getProduct(offset, limit).subscribe((data) => {
-      console.log('Retrieved products:', data); // Logging the retrieved products
+      console.log('Retrieved products:', data); 
   
       data.forEach((product: any) => {
         product.image = product.images && product.images.length > 0 ? product.images[0] : 'assets/images/ImageNotFound.png';
-        console.log('Product Image URL:', product.image); // Log image URLs
+        console.log('Product Image URL:', product.image); 
       });
   
       setTimeout(() => {
         this.products = [...this.products, ...data];
-        console.log('Updated products array:', this.products); // Logging the updated products array
+        console.log('Updated products array:', this.products); 
         this.Loading = false;
       }, 4000);
     }, error => {

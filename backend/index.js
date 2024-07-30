@@ -308,17 +308,16 @@ app.post('/v1/products', upload.fields([{ name: 'files', maxCount: 5 }, { name: 
 
 
 app.get('/v1/products', async (req, res) => {
-  const { offset = 0, limit = 10 } = req.query;
+  const { offset = 0 } = req.query;  
   try {
     const snapshot = await db.collection('products').get();
     const allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const products = allProducts.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
-    res.status(200).json(products);
+    res.status(200).json(allProducts); 
   } catch (error) {
     console.error('Error listing products:', error);
     res.status(500).json({ message: error.message });
   }
-});
+});  
 
 app.get('/v1/products/:id', async (req, res) => {
   const { id } = req.params;
