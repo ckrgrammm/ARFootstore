@@ -4,10 +4,10 @@ import { CarouselService } from 'ngx-owl-carousel-o/lib/services/carousel.servic
 import { ProductService } from '../services/product.service';
 import { ActivatedRoute } from '@angular/router';
 import { CartService } from '../../services/cart.service';
-import { CartItem } from '../../models/cart';
 import { HotToastService } from '@ngneat/hot-toast';
 import { WishItem } from '../../models/wishlist';
 import { WishlistService } from '../../services/wishlist.service';
+import { CartItemWithSize } from '../../models/cart';
 
 declare var bootstrap: any;
 
@@ -110,7 +110,7 @@ export class ProductDetailsComponent implements OnInit {
   product: any;
   productId!: string;
   imgNotFounded: boolean = false;
-  cartList: CartItem[] = [];
+  cartList: CartItemWithSize[] = [];
   WishItems: WishItem[] = [];
   quantity: number = 0;
   loremText: string = `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iusto, quos aspernatur eum dolorr eprehenderit eos et libero debitis itaque voluptatem! Laudantium modi sequi, id numquam liberosed quaerat. Eligendi, ipsum!`;
@@ -162,7 +162,7 @@ export class ProductDetailsComponent implements OnInit {
 
   getCartList() {
     this._cartService.cart$.subscribe((cart) => {
-      this.cartList = cart.items || [];
+      this.cartList = cart.items as CartItemWithSize[] || [];
       if (this.product) {
         this.productInCartList = this.checkProductInCartList(this.product);
       }
@@ -179,7 +179,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   checkProductInCartList(product: any) {
-    const cartItemExist = this.cartList.find((item) => item.product.id === product.id);
+    const cartItemExist = this.cartList.find((item) => item.productId === product.id && item.size === this.selectedSize.size);
     this.quantity = cartItemExist?.quantity || 0;
     return cartItemExist;
   }
@@ -188,37 +188,40 @@ export class ProductDetailsComponent implements OnInit {
     return this.WishItems.some((item) => item.product.id === product.id);
   }
 
-  updateCartItemQuantity(value: number, cartItem: CartItem, operation: string) {
+  updateCartItemQuantity(value: number, cartItem: CartItemWithSize, operation: string) {
     if (operation == "+") {
       value++;
     } else {
       value--;
     }
-    const updatedCartItem = {
-      product: cartItem.product,
+    const updatedCartItem: CartItemWithSize = {
+      productId: cartItem.productId,
+      size: cartItem.size,
       quantity: value,
     };
-  
+
     this._cartService.setCartItem(updatedCartItem, true);
   }
-  
-  deleteCartItem(productId: string) {
-    this._cartService.deleteCartItem(productId);
+
+  deleteCartItem(productId: string, size: string) {
+    this._cartService.deleteCartItem(productId, size);
   }
-  
 
   addProductToCart(item: any) {
     if (!this.product.stockStatus || !this.selectedSize || this.selectedSize.amount === 0) {
       this._toast.error('Product is out of stock or size is unavailable', { position: 'top-left' });
       return;
     }
-    const cartItem: CartItem = {
-      product: item,
+    const cartItem: CartItemWithSize = {
+      productId: item.id,
+      product: item, // Include product details
+      size: this.selectedSize.size,
       quantity: 1
     };
     this._cartService.setCartItem(cartItem);
     this._toast.success('Product added to cart successfully', { position: 'top-left' });
   }
+  
 
   addProductToWishList(item: any) {
     const WishItem: WishItem = {
@@ -245,8 +248,14 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   virtualTryOn(product: any) {
-    console.log('Virtual Try-On clicked for product:', product);
-    this._toast.info('Virtual Try-On feature coming soon!', { position: 'top-left' });
+    if (product.arQrUrl) {
+      const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+      const qrImage = document.getElementById('qrCodeImage') as HTMLImageElement;
+      qrImage.src = product.arQrUrl;
+      modal.show();
+    } else {
+      this._toast.info('No AR QR code available for this product.', { position: 'top-left' });
+    }
   }
 
   openInspectModal() {

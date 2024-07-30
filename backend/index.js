@@ -28,22 +28,31 @@ app.listen(port, () => {
 
 app.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
-  const roles = 'user'; 
+  const roles = 'user';
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
-    const userRef = db.collection('users').doc(email);
-    const doc = await userRef.get();
-    if (doc.exists) {
+    // Check if the user already exists in Firebase Auth
+    const userRecord = await admin.auth().getUserByEmail(email).catch(() => null);
+    if (userRecord) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // Create the user in Firebase Auth
+    await admin.auth().createUser({
+      email,
+      password,
+      displayName: name
+    });
+
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await userRef.set({
+    // Use the email as the document ID
+    await db.collection('users').doc(email).set({
       name,
       email,
       password: hashedPassword,
@@ -66,19 +75,24 @@ app.post('/login', async (req, res) => {
   }
 
   try {
-    const userRef = db.collection('users').doc(email);
-    const doc = await userRef.get();
-    if (!doc.exists) {
+    const userRecord = await admin.auth().getUserByEmail(email);
+    if (!userRecord) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const user = doc.data();
+    // Use email as the document ID to fetch user data
+    const userDoc = await db.collection('users').doc(email).get();
+    if (!userDoc.exists) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    const user = userDoc.data();
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ email: user.email, name: user.name, roles: user.roles }, 'secretKey', { expiresIn: '1h' });
+    const token = jwt.sign({ uid: userRecord.uid, email: user.email, name: user.name, roles: user.roles }, 'secretKey', { expiresIn: '1h' });
 
     res.status(200).json({ access_token: token, roles: user.roles });
   } catch (error) {
@@ -86,6 +100,7 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 app.get('/users/:email', async (req, res) => {
   const email = decodeURIComponent(req.params.email);
@@ -161,6 +176,36 @@ app.put('/update-profile', upload.single('profileImage'), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+app.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const userRecord = await admin.auth().getUserByEmail(email);
+    if (!userRecord) {
+      return res.status(400).json({ message: 'User with this email does not exist' });
+    }
+
+    const resetPasswordLink = await admin.auth().generatePasswordResetLink(email);
+    console.log('Password reset link generated:', resetPasswordLink);
+
+    // Optionally send email here if you have an email service configured
+    // await sendResetPasswordEmail(email, resetPasswordLink);
+
+    res.status(200).json({ message: 'Password reset link has been sent to your email', resetPasswordLink });
+  } catch (error) {
+    console.error('Error in /forgot-password:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
+
 
 
 app.post('/v1/products', upload.fields([{ name: 'files', maxCount: 5 }, { name: 'arQr', maxCount: 1 }]), async (req, res) => {
@@ -482,20 +527,23 @@ app.post('/v1/auth/refresh-token', async (req, res) => {
   }
 
   try {
-    jwt.verify(token, 'secretKey', (err, user) => {
-      if (err) {
-        return res.status(403).json({ message: 'Invalid token' });
-      }
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    
+    const newToken = jwt.sign({
+      uid: decodedToken.uid,
+      email: decodedToken.email,
+      name: decodedToken.name,
+      roles: decodedToken.roles
+    }, 'secretKey', { expiresIn: '1h' });
 
-      const newToken = jwt.sign({ email: user.email, name: user.name }, 'secretKey', { expiresIn: '1h' });
-
-      res.status(200).json({ access_token: newToken });
-    });
+    res.status(200).json({ access_token: newToken });
   } catch (error) {
     console.error('Error in /v1/auth/refresh-token:', error);
-    res.status(500).json({ message: error.message });
+    res.status(403).json({ message: 'Invalid token' });
   }
 });
+
+
 
 app.get('/v1/search', async (req, res) => {
   const { query, type } = req.query;
@@ -600,7 +648,6 @@ app.post('/upload-feet', upload.single('feetImage'), async (req, res) => {
 
 
 
-// Create Admin
 app.post('/admins', async (req, res) => {
   const { name, email, password, roles = 'admin' } = req.body;
 
@@ -609,15 +656,22 @@ app.post('/admins', async (req, res) => {
   }
 
   try {
-    const userRef = db.collection('users').doc(email);
-    const doc = await userRef.get();
-    if (doc.exists) {
+    const userRecord = await admin.auth().getUserByEmail(email).catch(() => null);
+    if (userRecord) {
       return res.status(400).json({ message: 'Admin already exists' });
     }
 
+    const user = await admin.auth().createUser({
+      email,
+      password,
+      displayName: name
+    });
+
+    await admin.auth().setCustomUserClaims(user.uid, { roles });
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await userRef.set({
+    await db.collection('users').doc(email).set({
       name,
       email,
       password: hashedPassword,
@@ -632,7 +686,6 @@ app.post('/admins', async (req, res) => {
   }
 });
 
-// Get All Admins
 app.get('/admins', async (req, res) => {
   try {
     const snapshot = await db.collection('users').where('roles', '==', 'admin').get();
@@ -644,7 +697,6 @@ app.get('/admins', async (req, res) => {
   }
 });
 
-// Get Admin by ID
 app.get('/admins/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -661,7 +713,6 @@ app.get('/admins/:id', async (req, res) => {
   }
 });
 
-// Update Admin
 app.put('/admins/:id', async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
@@ -677,7 +728,6 @@ app.put('/admins/:id', async (req, res) => {
   }
 });
 
-// Delete Admin
 app.delete('/admins/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -840,8 +890,12 @@ app.post('/checkout', async (req, res) => {
     const orderData = req.body;
     console.log('Received order data:', orderData);
 
+    // Save order data to the orders collection
     const orderRef = db.collection('orders').doc();
     await orderRef.set(orderData);
+
+    // Remove items from the user's cart
+    await removeCartItems(orderData.email, orderData.cartItems);
 
     res.status(201).json({ message: 'Order placed successfully' });
   } catch (error) {
@@ -849,6 +903,54 @@ app.post('/checkout', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+async function removeCartItems(email, cartItems) {
+  try {
+    console.log(`Attempting to remove items from the cart for user: ${email}`);
+
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      console.error(`User not found for email: ${email}`);
+      throw new Error('User not found');
+    }
+
+    const cart = doc.data().cart || { items: [] };
+    const updatedCartItems = cart.items.filter(cartItem =>
+      !cartItems.some(orderItem => orderItem.productId === cartItem.product.id)
+    );
+
+    console.log(`Updating cart for user: ${email} with items: `, updatedCartItems);
+
+    await userRef.update({ cart: { items: updatedCartItems } });
+  } catch (error) {
+    console.error('Error removing cart items:', error);
+    throw error; 
+  }
+}
+
+app.post('/get-cart', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const cart = doc.data().cart || { items: [] };
+    res.status(200).json({ cart });
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 app.post('/update-quantity', async (req, res) => {
   const { productId, size, quantity } = req.body;
@@ -878,14 +980,17 @@ app.post('/update-quantity', async (req, res) => {
     }
 
     productData.sizes[sizeIndex].amount -= quantity;
+    productData.totalOrdered += quantity;
 
     console.log(`Updating product ${productId} size ${size} quantity to ${productData.sizes[sizeIndex].amount}`);
+    console.log(`Updating product ${productId} totalOrdered to ${productData.totalOrdered}`);
 
-    await productRef.update({ sizes: productData.sizes });
+    await productRef.update({ sizes: productData.sizes, totalOrdered: productData.totalOrdered });
 
-    return res.status(200).json({ message: 'Quantity updated successfully' });
+    return res.status(200).json({ message: 'Quantity and totalOrdered updated successfully' });
   } catch (error) {
     console.error('Error updating quantity:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+

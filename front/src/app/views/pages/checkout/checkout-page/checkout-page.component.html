@@ -79,13 +79,14 @@
                                 <div class="col-lg-6 mb-3">
                                     <label class="form-label">Email</label>
                                     <input type="text" class="form-control" placeholder="example@gmail.com"
-                                        formControlName="email">
-                                    <small *ngIf="checkoutForm?.email?.invalid && isSubmitted"
-                                        class=" d-block text-danger">
-                                        <span *ngIf="checkoutForm?.email?.errors!.required">email is required</span>
-                                        <span *ngIf="checkoutForm?.email?.errors!.email">email is invalid</span>
+                                        formControlName="email" [disabled]="true">
+                                    <small *ngIf="checkoutForm.email.invalid && isSubmitted"
+                                        class="d-block text-danger">
+                                        <span *ngIf="checkoutForm.email.errors?.required">Email is required</span>
+                                        <span *ngIf="checkoutForm.email.errors?.email">Email is invalid</span>
                                     </small>
                                 </div>
+
                             </div>
 
                             <label class="form-check mb-3">
@@ -152,9 +153,9 @@
                                 <div class="col-sm-4 mb-3">
                                     <label for="" class="form-label">City*</label>
                                     <select class="form-select" id="city*" formControlName="city" aria-label="City*">
-                                        <option value="New York">New York</option>
-                                        <option value="Moscow">Moscow</option>
-                                        <option value="Samarqand">Samarqand</option>
+                                        <option value="Selangor">Selangor</option>
+                                        <option value="Kuala Lumpur">Kuala Lumpur</option>
+                                        <option value="Johor">Johor</option>
                                     </select>
                                 </div>
 
@@ -253,14 +254,14 @@
 
                     <figure class="itemside align-items-center mb-4" *ngFor="let item of cartList">
                         <div class="aside">
-                            <b class="badge bg-secondary rounded-pill">{{item?.quantity}}</b>
-                            <img [src]="item?.product?.images[0]" class="img-sm rounded border">
+                          <b class="badge bg-secondary rounded-pill">{{item?.quantity}}</b>
+                          <img [src]="item?.product?.images[0]" class="img-sm rounded border">
                         </div>
                         <figcaption class="info">
-                            <a routerLink="/products/{{item?.product?.id}}" class="title">{{item?.product?.title}}</a>
-                            <div class="price text-muted">Price: ${{item?.product?.price}}</div>
+                          <a routerLink="/products/{{item?.product?.id}}" class="title">{{item?.product?.title}}</a>
+                          <div class="price text-muted">Price: ${{item?.product?.price}}</div>
                         </figcaption>
-                    </figure>
+                      </figure>                      
                 </article>
             </aside>
         </div>

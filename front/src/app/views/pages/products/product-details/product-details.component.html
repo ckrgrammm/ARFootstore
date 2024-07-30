@@ -104,7 +104,7 @@
                         (click)="$event.preventDefault(); openInspectModal()">
                         <i class="fa fa-cube"></i> Inspect
                     </a>
-                    <a href="#" *ngIf="product?.model3d" id="virtualTryOn" class="btn btn-info me-2"
+                    <a href="#" *ngIf="product?.arQrUrl" id="virtualTryOn" class="btn btn-info me-2"
                         (click)="$event.preventDefault(); virtualTryOn(product)">
                         <i class="fa fa-eye"></i> Virtual Try-On
                     </a>
@@ -151,3 +151,17 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="qrModalLabel">Scan to Try On</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" />
+        </div>
+      </div>
+    </div>
+  </div>

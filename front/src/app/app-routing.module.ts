@@ -57,7 +57,7 @@ const routes: Routes = [
           { path: 'admins/edit/:id', component: EditAdminComponent },
           { path: 'products/add', component: AdminAddProductComponent },
           { path: 'products/edit/:id', component: AdminEditProductComponent },
-          { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+          { path: '', redirectTo: 'products', pathMatch: 'full' }
         ],
         canActivate: [AuthGuard],
         

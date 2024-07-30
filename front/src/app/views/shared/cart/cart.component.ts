@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HotToastService } from '@ngneat/hot-toast';
-import { CartItem } from '../../pages/models/cart';
+import { CartItemWithSize } from '../../pages/models/cart';
 import { CartService } from '../../pages/services/cart.service';
 
 @Component({
@@ -15,22 +15,21 @@ export class CartComponent implements OnInit {
   totalPrice!: number;
   opanCartlist: boolean = false;
   isVisable: boolean = false;
-  cartList!: CartItem[];
+  cartList!: CartItemWithSize[];
   deleteProductId!: string;
-  constructor
-    (
-      private router: Router,
-      private _cartService: CartService,
-      private _toast: HotToastService
-    ) { }
+  deleteProductSize!: string;
 
+  constructor(
+    private router: Router,
+    private _cartService: CartService,
+    private _toast: HotToastService
+  ) { }
 
   openCartlist() {
     this.getCartList();
     this.opanCartlist = true;
     document.body.style.overflowY = "hidden";
   }
-
 
   closeSidebar() {
     this.opanCartlist = false;
@@ -43,15 +42,8 @@ export class CartComponent implements OnInit {
     });
   }
 
-
   deleteCartItem() {
-    this._cartService.deleteCartItem(this.deleteProductId);
-    this.closeCofirmModal();
-    this._toast.error('Product removed from cart',
-      {
-        position: 'top-left'
-      });
-
+    this._cartService.deleteCartItem(this.deleteProductId, this.deleteProductSize);
   }
 
   getTotalPrice() {
@@ -65,8 +57,7 @@ export class CartComponent implements OnInit {
     });
   }
 
-
-  updateCartItemQuantity(value: number, cartItem: CartItem, operation: string) {
+  updateCartItemQuantity(value: number, cartItem: CartItemWithSize, operation: string) {
     if (operation == "+") {
       value++;
     } else {
@@ -74,13 +65,14 @@ export class CartComponent implements OnInit {
     }
     this._cartService.setCartItem(
       {
+        productId: cartItem.productId,
         product: cartItem.product,
+        size: cartItem.size,
         quantity: value,
       },
       true
     );
   }
-
 
   navigateToCheckout() {
     this.closeSidebar();
@@ -92,14 +84,16 @@ export class CartComponent implements OnInit {
     this.router.navigate(['/products', productId]);
   }
 
-  openCofirmModal(productId: string) {
+  openCofirmModal(cartItem: CartItemWithSize) {
     this.isVisable = true;
-    this.deleteProductId = productId
+    this.deleteProductId = cartItem.productId!;
+    this.deleteProductSize = cartItem.size!;
   }
 
   closeCofirmModal() {
     this.isVisable = false;
   }
+
   ngOnInit(): void {
     this._cartService.cart$.subscribe((cart) => {
       this.cartCount = cart?.items?.length ?? 0;
@@ -107,5 +101,4 @@ export class CartComponent implements OnInit {
     this.getCartList();
     this.getTotalPrice();
   }
-
 }

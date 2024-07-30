@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { Cart, CartItem } from '../models/cart';
+import { Cart, CartItemWithSize } from '../models/cart';
 import { AuthService } from '../auth/services/auth.service';
 
 export const CART_KEY = 'cart';
@@ -13,12 +13,12 @@ export const CART_KEY = 'cart';
 export class CartService {
   cart$: BehaviorSubject<Cart> = new BehaviorSubject(this.getCart());
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
   initCartLocalStorage() {
     const cart: Cart = this.getCart();
     if (!cart) {
-      const initialCart = {
+      const initialCart: Cart = {
         items: []
       };
       const initialCartJson = JSON.stringify(initialCart);
@@ -27,7 +27,7 @@ export class CartService {
   }
 
   emptyCart() {
-    const initialCart = {
+    const initialCart: Cart = {
       items: []
     };
     const initialCartJson = JSON.stringify(initialCart);
@@ -46,12 +46,12 @@ export class CartService {
     return cart;
   }
 
-  setCartItem(cartItem: CartItem, updateCartItem?: boolean): Cart {
+  setCartItem(cartItem: CartItemWithSize, updateCartItem?: boolean): Cart {
     const cart = this.getCart();
-    const cartItemExist = cart.items?.find((item) => item.product.id === cartItem.product.id);
+    const cartItemExist = cart.items?.find((item: CartItemWithSize) => item.productId === cartItem.productId && item.size === cartItem.size);
     if (cartItemExist) {
-      cart.items?.map((item) => {
-        if (item.product.id === cartItem.product.id) {
+      cart.items?.map((item: CartItemWithSize) => {
+        if (item.productId === cartItem.productId && item.size === cartItem.size) {
           if (updateCartItem) {
             item.quantity = cartItem.quantity;
           } else {
@@ -73,17 +73,38 @@ export class CartService {
     return cart;
   }
 
-  deleteCartItem(productId: string) {
+  deleteCartItem(productId: string, size: string) {
     const cart = this.getCart();
-    const newCart = cart.items?.filter((item) => item.product.id !== productId);
-
+    const newCart = cart.items?.filter((item: CartItemWithSize) => item.productId !== productId || item.size !== size);
+  
     cart.items = newCart;
-
+  
     const cartJsonString = JSON.stringify(cart);
     localStorage.setItem(CART_KEY, cartJsonString);
-
+  
     this.cart$.next(cart);
     this.updateCartOnServer(cart);
+  }
+  
+
+  fetchCartFromServer() {
+    const email = this.authService.getEmail();
+    if (email) {
+      this.http.post(`${environment.api}get-cart`, { email }).subscribe(
+        (response: any) => {
+          const cart = response.cart;
+          this.updateLocalCart(cart);
+          console.log('Cart fetched from server:', response);
+        },
+        error => console.error('Error fetching cart from server:', error)
+      );
+    }
+  }
+
+  private updateLocalCart(cart: Cart) {
+    const cartJson = JSON.stringify(cart);
+    localStorage.setItem(CART_KEY, cartJson);
+    this.cart$.next(cart);
   }
 
   private updateCartOnServer(cart: Cart) {

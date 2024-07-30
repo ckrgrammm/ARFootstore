@@ -48,7 +48,7 @@ export class AuthService {
         formData.append(key, profileData[key]);
       }
     }
-  
+
     return this.http.put<any>(`${environment.api}update-profile`, formData).pipe(
       map((response) => {
         this.getUserDetails(email).subscribe((userDetails) => {
@@ -58,7 +58,7 @@ export class AuthService {
       })
     );
   }
-  
+
 
   register(name: string, email: string, password: string): Observable<any> {
     return this.http.post<any>(`${environment.api}register`, { name, email, password });
@@ -132,5 +132,9 @@ export class AuthService {
 
   stopRefreshTokenTimer() {
     clearTimeout(this.refreshTokenTimeout);
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${environment.api}forgot-password`, { email });
   }
 }
