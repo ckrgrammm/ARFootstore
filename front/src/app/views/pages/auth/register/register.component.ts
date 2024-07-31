@@ -16,7 +16,7 @@ export class RegisterComponent implements OnInit {
   registerFormGroup!: FormGroup;
   isSubmitted: boolean = false;
   authError: boolean = false;
-  authMessage:string = 'Email or Password are wrong';
+  authMessage: string = 'Email or Password are wrong';
 
   constructor(
     private _formBuilder: FormBuilder,
@@ -26,10 +26,12 @@ export class RegisterComponent implements OnInit {
   ) { }
 
   initRegisterForm() {
+    const savedForm = JSON.parse(localStorage.getItem('registerForm') || '{}');
     this.registerFormGroup = this._formBuilder.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      name: [savedForm.name || '', Validators.required],
+      email: [savedForm.email || '', [Validators.required, Validators.email]],
+      password: [savedForm.password || '', Validators.required],
+      agree: [savedForm.agree || false, Validators.requiredTrue]
     });
   }
 
@@ -51,6 +53,7 @@ export class RegisterComponent implements OnInit {
     ).subscribe(
       () => {
         this.authError = false;
+        localStorage.removeItem('registerForm'); 
         this._router.navigate(['/auth']);
       },
       (error: HttpErrorResponse) => {
@@ -61,6 +64,10 @@ export class RegisterComponent implements OnInit {
         }
       }
     );
+  }
+
+  saveFormData() {
+    localStorage.setItem('registerForm', JSON.stringify(this.registerFormGroup.value));
   }
 
   get registerForm() {
