@@ -4,22 +4,14 @@
       <div class="row align-items-center justify-content-between">
         <div class="col mt-10 mb-10">
           <div class="header-links">
-            <a href="#">
-              <i class="fa-solid fa-truck-moving"></i>
-              <span>Track your order</span>
-            </a>
-            <a href="#">
-              <i class="fa-solid fa-location-dot"></i>
-              <span>Locate Store</span>
+            <a routerLink="/products">
+              AR Foot Wear
+              <i class="fa-solid fa-cart-shopping"></i>
             </a>
           </div>
         </div>
         <div class="col order-2 order-xs-2 order-lg-12 mt-10 mb-10">
           <div class="header-account-links">
-            <a href="#">
-              <i class="fa-solid fa-circle-question"></i>
-              <span>Help</span>
-            </a>
             <a routerLink="/auth" *ngIf="!loggedIn">
               <i class="fa-solid fa-right-to-bracket"></i>
               <span>Login</span>
@@ -66,9 +58,9 @@
         </div>
         <div class="col-lg-6 order-12 order-xs-12 order-lg-2 mt-10 mb-10">
           <div class="">
-            <form (ngSubmit)="onSearch()" #searchForm="ngForm">
+            <form (ngSubmit)="onSearch(searchForm)" #searchForm="ngForm">
               <div class="input-group">
-                <input type="search" class="form-control" style="width:55%" placeholder="Search" [(ngModel)]="searchQuery" name="searchQuery" (input)="onSearch()" required>
+                <input type="search" class="form-control" style="width:55%" placeholder="Search" [(ngModel)]="searchQuery" name="searchQuery" required>
                 <button class="btn btn-warning" type="submit">
                   <i class="fa fa-search"></i>
                 </button>

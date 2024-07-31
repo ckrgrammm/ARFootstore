@@ -30,10 +30,10 @@ export class AdminAddProductComponent implements OnInit {
       colour: ['', Validators.required],
       description: ['', Validators.required],
       material: ['', Validators.required],
-      price: [0, Validators.required],
+      price: [0, [Validators.required, Validators.min(1), Validators.max(99999)]],
       stockStatus: ['', Validators.required],
       model3d: [false],
-      numSizes: [1, Validators.required],
+      numSizes: [1, [Validators.required, Validators.min(1), Validators.max(50)]],
       sizes: this.fb.array([])
     });
 
@@ -46,7 +46,8 @@ export class AdminAddProductComponent implements OnInit {
 
   onNumSizesChange(event: any): void {
     const numSizes = event.target.value || 0;
-    if (numSizes < 1) {
+    if (numSizes < 1 || numSizes > 50) {
+      this.toast.error('Number of sizes should be between 1 and 50');
       return;
     }
     
@@ -56,8 +57,8 @@ export class AdminAddProductComponent implements OnInit {
 
     for (let i = 0; i < numSizes; i++) {
       this.sizes.push(this.fb.group({
-        size: ['', Validators.required],
-        amount: [0, Validators.required]
+        size: ['', [Validators.required, Validators.min(1), Validators.max(30)]],
+        amount: [0, [Validators.required, Validators.min(1), Validators.max(99999)]]
       }));
     }
   }

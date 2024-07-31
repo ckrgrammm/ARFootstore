@@ -243,11 +243,6 @@
                     </dl>
 
                     <dl class="dlist-align">
-                        <dt>Discount:</dt>
-                        <dd class="text-end text-danger"> - $200.00 </dd>
-                    </dl>
-
-                    <dl class="dlist-align">
                         <dt>Shipping cost:</dt>
                         <dd class="text-end"> + $50.00 </dd>
                     </dl>
@@ -255,8 +250,8 @@
                     <hr>
                     <dl class="dlist-align">
                         <dt> Total: </dt>
-                        <dd class="text-end"> <strong class="text-dark">${{totalPrice - 200 + 50}}</strong> </dd>
-                    </dl>
+                        <dd class="text-end"> <strong class="text-dark">${{totalPrice + shippingCost}}</strong> </dd>
+                      </dl>
 
                     <div class="input-group my-4">
                         <input type="text" class="form-control" name="" placeholder="Promo code">

@@ -552,21 +552,24 @@ app.get('/v1/search', async (req, res) => {
   }
 
   try {
-    let productsRef = db.collection('products').where('name', '>=', query).where('name', '<=', query + '\uf8ff');
-
-    if (type) {
-      productsRef = productsRef.where('type', '==', type);
-    }
-
+    const productsRef = db.collection('products');
     const snapshot = await productsRef.get();
     if (snapshot.empty) {
       return res.status(404).json({ message: 'No matching products found' });
     }
 
+    const lowercasedQuery = query.toLowerCase();
     const products = [];
     snapshot.forEach(doc => {
-      products.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      if (data.name && data.name.toLowerCase().includes(lowercasedQuery)) {
+        products.push({ id: doc.id, ...doc.data() });
+      }
     });
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: 'No matching products found' });
+    }
 
     res.status(200).json(products);
   } catch (error) {
@@ -574,6 +577,7 @@ app.get('/v1/search', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 app.post('/upload-feet', upload.single('feetImage'), async (req, res) => {
   const { email, foot } = req.body; 

@@ -19,7 +19,7 @@ export class CheckoutCompleteComponent implements OnInit {
   ) { }
 
   navigateToStore() {
-    this.router.navigate(['/'])
+    this.router.navigate(['/products'])
   }
 
   getTotalPrice() {

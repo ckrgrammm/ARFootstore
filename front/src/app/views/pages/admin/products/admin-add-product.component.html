@@ -40,7 +40,7 @@
       <label for="price" class="form-label">Price</label>
       <input type="number" step="0.01" class="form-control" id="price" formControlName="price">
       <div *ngIf="isSubmitted && f.price.errors" class="text-danger">
-        Price is required
+        Price is required and must be between 1 and 99999
       </div>
     </div>
     <div class="mb-3">
@@ -56,19 +56,25 @@
     <div class="mb-3">
       <label for="numSizes" class="form-label">How many sizes of this shoe?</label>
       <input type="number" class="form-control" id="numSizes" (input)="onNumSizesChange($event)" min="1" formControlName="numSizes">
+      <div *ngIf="isSubmitted && f.numSizes.errors" class="text-danger">
+        Number of sizes must be between 1 and 50
+      </div>
     </div>
     <div formArrayName="sizes">
       <div *ngFor="let size of sizes.controls; let i = index" [formGroupName]="i" class="mb-3">
         <div class="row">
           <div class="col">
             <label for="size-{{i}}" class="form-label">Size</label>
-            <input type="number" class="form-control" id="size-{{i}}" formControlName="size" placeholder="Size">
+            <input type="number" class="form-control" id="size-{{i}}" formControlName="size" placeholder="Size" min="1" max="30">
+            <div *ngIf="isSubmitted && sizes.at(i).get('size')?.errors" class="text-danger">
+              Size is required and must be between 1 and 30
+            </div>
           </div>
           <div class="col">
             <label for="amount-{{i}}" class="form-label">Amount</label>
-            <input type="number" class="form-control" id="amount-{{i}}" formControlName="amount" placeholder="Amount">
+            <input type="number" class="form-control" id="amount-{{i}}" formControlName="amount" placeholder="Amount" min="1" max="99999">
             <div *ngIf="isSubmitted && sizes.at(i).get('amount')?.errors" class="text-danger">
-              Amount is required
+              Amount is required and must be between 1 and 99999
             </div>
           </div>
         </div>
@@ -89,6 +95,9 @@
     <div class="mb-3">
       <label for="images" class="form-label">Images</label>
       <input type="file" class="form-control" id="images" (change)="onFilesSelected($event)" multiple>
+      <div *ngIf="selectedFiles.length > 4" class="text-danger">
+        You can only upload up to 4 images
+      </div>
     </div>
     <button type="submit" class="btn btn-primary">Add Product</button>
   </form>

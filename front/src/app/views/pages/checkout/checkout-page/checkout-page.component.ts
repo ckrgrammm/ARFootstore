@@ -18,6 +18,7 @@ export class CheckoutPageComponent implements OnInit {
   isSubmitted = false;
   cartList!: CartItemWithSize[];
   totalPrice!: number;
+  shippingCost: number = 50; // Default shipping cost
   isCartEmpty: boolean = false;
   userEmail!: string | null;
 
@@ -33,15 +34,14 @@ export class CheckoutPageComponent implements OnInit {
     this._cartService.cart$.subscribe((cart) => {
       this.cartList = cart.items as CartItemWithSize[];
       this.isCartEmpty = this.cartList.length === 0;
+      this.calculateTotalPrice();
     });
   }
 
-  getTotalPrice() {
-    this._cartService.cart$.subscribe((cart) => {
-      this.totalPrice = 0;
-      cart.items?.forEach((item) => {
-        this.totalPrice += item.product.price! * item.quantity!;
-      });
+  calculateTotalPrice() {
+    this.totalPrice = 0;
+    this.cartList?.forEach((item) => {
+      this.totalPrice += item.product.price! * item.quantity!;
     });
   }
 
@@ -83,28 +83,21 @@ export class CheckoutPageComponent implements OnInit {
     }
   
     const orderData = {
-      ...this.checkoutFormGroup.getRawValue(), // Use getRawValue() to get the disabled email field
+      ...this.checkoutFormGroup.getRawValue(),
       cartItems: this.cartList.map(item => ({
         productId: item.product.id,
-        size: item.size, // Ensure size is included here
+        size: item.size,
         quantity: item.quantity
       })),
-      totalPrice: this.totalPrice,
+      totalPrice: this.totalPrice + this.shippingCost, // Include shipping cost
       orderDate: new Date().toISOString()
     };
   
     this.http.post(`${environment.api}checkout`, orderData).subscribe(
       response => {
-        // Navigate to success page
         this.router.navigate(['/checkout/success']);
-  
-        // Update product quantities
         this.updateProductQuantities(orderData.cartItems);
-  
-        // Clear the local cart
         this._cartService.emptyCart();
-  
-        // Fetch the updated cart from the server
         this._cartService.fetchCartFromServer();
       },
       error => {
@@ -131,11 +124,9 @@ export class CheckoutPageComponent implements OnInit {
       );
     });
   }
-  
 
   ngOnInit(): void {
     this.getCartList();
-    this.getTotalPrice();
     this.initCheckoutForm();
   }
 }

@@ -21,7 +21,7 @@ export class HeaderComponent implements OnInit {
   profileImage: string | null = null;
   user: any = null;
   isAdmin: boolean = false;
-  isAdminRoute: boolean = false; // New boolean flag for admin route
+  isAdminRoute: boolean = false; 
 
   searchQuery: string = '';
   searchResults: any[] = [];
@@ -103,8 +103,8 @@ export class HeaderComponent implements OnInit {
     this._router.navigate(['/products']);
   }
 
-  onSearch(): void {
-    if (this.searchQuery.trim()) {
+  onSearch(form: any): void {
+    if (form.valid && this.searchQuery.trim()) {
       this._productService.searchProducts(this.searchQuery.trim()).subscribe(
         (results) => {
           this.searchResults = results;
