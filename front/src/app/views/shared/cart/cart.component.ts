@@ -44,6 +44,7 @@ export class CartComponent implements OnInit {
 
   deleteCartItem() {
     this._cartService.deleteCartItem(this.deleteProductId, this.deleteProductSize);
+    this.isVisable = false;
   }
 
   getTotalPrice() {

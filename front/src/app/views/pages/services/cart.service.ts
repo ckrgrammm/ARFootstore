@@ -73,17 +73,26 @@ export class CartService {
     return cart;
   }
 
-  deleteCartItem(productId: string, size: string) {
-    const cart = this.getCart();
-    const newCart = cart.items?.filter((item: CartItemWithSize) => item.productId !== productId || item.size !== size);
+  // deleteCartItem(productId: string, size: string) {
+  //   const cart = this.getCart();
+  //   const newCart = cart.items?.filter((item: CartItemWithSize) => item.productId !== productId || item.size !== size);
   
-    cart.items = newCart;
+  //   cart.items = newCart;
   
-    const cartJsonString = JSON.stringify(cart);
-    localStorage.setItem(CART_KEY, cartJsonString);
+  //   const cartJsonString = JSON.stringify(cart);
+  //   localStorage.setItem(CART_KEY, cartJsonString);
   
-    this.cart$.next(cart);
-    this.updateCartOnServer(cart);
+  //   this.cart$.next(cart);
+  //   this.updateCartOnServer(cart);
+  // }
+
+  deleteCartItem(productId: string, size: string): void {
+    const email = this.authService.getEmail();
+    if (email) {
+      this.http.post<Cart>(`${environment.api}remove-cart-item`, { email, productId, size }).subscribe((cart) => {
+        this.cart$.next(cart);
+      });
+    }
   }
   
 
