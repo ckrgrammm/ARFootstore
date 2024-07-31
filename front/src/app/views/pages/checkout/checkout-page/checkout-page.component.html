@@ -151,13 +151,27 @@
                                 </div>
 
                                 <div class="col-sm-4 mb-3">
-                                    <label for="" class="form-label">City*</label>
-                                    <select class="form-select" id="city*" formControlName="city" aria-label="City*">
-                                        <option value="Selangor">Selangor</option>
-                                        <option value="Kuala Lumpur">Kuala Lumpur</option>
+                                    <label for="city" class="form-label">City*</label>
+                                    <select class="form-select" id="city" formControlName="city" aria-label="City*">
                                         <option value="Johor">Johor</option>
+                                        <option value="Kedah">Kedah</option>
+                                        <option value="Kelantan">Kelantan</option>
+                                        <option value="Melaka">Melaka</option>
+                                        <option value="Negeri Sembilan">Negeri Sembilan</option>
+                                        <option value="Pahang">Pahang</option>
+                                        <option value="Pulau Pinang">Pulau Pinang</option>
+                                        <option value="Perak">Perak</option>
+                                        <option value="Perlis">Perlis</option>
+                                        <option value="Sabah">Sabah</option>
+                                        <option value="Sarawak">Sarawak</option>
+                                        <option value="Selangor">Selangor</option>
+                                        <option value="Terengganu">Terengganu</option>
+                                        <option value="Kuala Lumpur">Kuala Lumpur</option>
+                                        <option value="Labuan">Labuan</option>
+                                        <option value="Putrajaya">Putrajaya</option>
                                     </select>
                                 </div>
+
 
                                 <div class="col-sm-4 mb-3">
                                     <label for="" class="form-label">Country*</label>
@@ -254,14 +268,14 @@
 
                     <figure class="itemside align-items-center mb-4" *ngFor="let item of cartList">
                         <div class="aside">
-                          <b class="badge bg-secondary rounded-pill">{{item?.quantity}}</b>
-                          <img [src]="item?.product?.images[0]" class="img-sm rounded border">
+                            <b class="badge bg-secondary rounded-pill">{{item?.quantity}}</b>
+                            <img [src]="item?.product?.images[0]" class="img-sm rounded border">
                         </div>
                         <figcaption class="info">
-                          <a routerLink="/products/{{item?.product?.id}}" class="title">{{item?.product?.title}}</a>
-                          <div class="price text-muted">Price: ${{item?.product?.price}}</div>
+                            <a routerLink="/products/{{item?.product?.id}}" class="title">{{item?.product?.title}}</a>
+                            <div class="price text-muted">Price: ${{item?.product?.price}}</div>
                         </figcaption>
-                      </figure>                      
+                    </figure>
                 </article>
             </aside>
         </div>
