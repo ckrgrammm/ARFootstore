@@ -60,10 +60,10 @@ export class OrderComponent implements OnInit {
     this.orderService.getTopSellingProduct().subscribe(
       (data) => {
         this.topSellingProduct = data;
-        console.log("Top Selling Product:", this.topSellingProduct);
+        // console.log("Top Selling Product:", this.topSellingProduct);
       },
       (error) => {
-        console.error('Error loading top selling product:', error);
+        // console.error('Error loading top selling product:', error);
       }
     );
   }

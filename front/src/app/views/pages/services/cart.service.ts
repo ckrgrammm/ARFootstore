@@ -13,7 +13,11 @@ export const CART_KEY = 'cart';
 export class CartService {
   cart$: BehaviorSubject<Cart> = new BehaviorSubject(this.getCart());
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  constructor(private http: HttpClient, private authService: AuthService) {
+    if (this.authService.loggedIn()) {
+      this.fetchCartFromServer();
+    }
+  }
 
   initCartLocalStorage() {
     const cart: Cart = this.getCart();
@@ -42,8 +46,7 @@ export class CartService {
 
   getCart(): Cart {
     const cartJsonString = localStorage.getItem(CART_KEY);
-    const cart: Cart = JSON.parse(cartJsonString!);
-    return cart;
+    return cartJsonString ? JSON.parse(cartJsonString) : { items: [] };
   }
 
   setCartItem(cartItem: CartItemWithSize, updateCartItem?: boolean): Cart {
@@ -73,19 +76,6 @@ export class CartService {
     return cart;
   }
 
-  // deleteCartItem(productId: string, size: string) {
-  //   const cart = this.getCart();
-  //   const newCart = cart.items?.filter((item: CartItemWithSize) => item.productId !== productId || item.size !== size);
-  
-  //   cart.items = newCart;
-  
-  //   const cartJsonString = JSON.stringify(cart);
-  //   localStorage.setItem(CART_KEY, cartJsonString);
-  
-  //   this.cart$.next(cart);
-  //   this.updateCartOnServer(cart);
-  // }
-
   deleteCartItem(productId: string, size: string): void {
     const email = this.authService.getEmail();
     if (email) {
@@ -94,7 +84,6 @@ export class CartService {
       });
     }
   }
-  
 
   fetchCartFromServer() {
     const email = this.authService.getEmail();
@@ -124,5 +113,14 @@ export class CartService {
         error => console.error('Error updating cart on server:', error)
       );
     }
+  }
+
+  private clearLocalCart() {
+    localStorage.removeItem(CART_KEY);
+    this.cart$.next({ items: [] });
+  }
+
+  canAddToCart(): boolean {
+    return this.authService.loggedIn();
   }
 }

@@ -102,4 +102,14 @@ export class CartComponent implements OnInit {
     this.getCartList();
     this.getTotalPrice();
   }
+
+  addToCart(cartItem: CartItemWithSize) {
+    if (this._cartService.canAddToCart()) {
+      this._cartService.setCartItem(cartItem);
+      this._toast.success('Item added to cart!');
+    } else {
+      this._toast.error('Please log in to add items to the cart.');
+      this.router.navigate(['/login']);
+    }
+  }
 }

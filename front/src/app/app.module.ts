@@ -18,6 +18,7 @@ import { LocalstorageService } from './views/pages/auth/services/localstorage.se
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from './views/shared/shared.module';
 import { AdminModule } from './views/pages/admin/admin.module'; 
+import { CartFetchService } from './views/pages/services/cart.fetch.service';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,12 @@ import { AdminModule } from './views/pages/admin/admin.module';
     AdminModule  
   ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    CartService,
+    WishlistService,
+    AuthService,
+    LocalstorageService,
+    CartFetchService
   ],
   bootstrap: [AppComponent],
   schemas: [NO_ERRORS_SCHEMA]

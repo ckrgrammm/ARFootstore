@@ -851,6 +851,59 @@ app.post('/remove-cart-item', async (req, res) => {
   }
 });
 
+app.post('/add-to-cart', async (req, res) => {
+  const { email, product } = req.body;
+
+  if (!email || !product) {
+    return res.status(400).json({ message: 'Email and product are required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const cart = doc.data().cart || { items: [] };
+    const cartItemExist = cart.items.find(item => item.id === product.id);
+    if (cartItemExist) {
+      cartItemExist.quantity += 1;
+    } else {
+      cart.items.push({ ...product, quantity: 1 });
+    }
+
+    await userRef.update({ cart });
+
+    res.status(200).json({ message: 'Product added to cart', cart });
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/get-cart', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const cart = doc.data().cart || { items: [] };
+    res.status(200).json({ cart });
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 app.post('/add-to-wishlist', async (req, res) => {
   const { email, product } = req.body;
 
@@ -899,37 +952,6 @@ app.post('/remove-from-wishlist', async (req, res) => {
     res.status(200).json({ message: 'Product removed from wishlist', wishlist: { items: updatedWishlistItems } });
   } catch (error) {
     console.error('Error removing from wishlist:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-app.post('/add-to-cart', async (req, res) => {
-  const { email, product } = req.body;
-
-  if (!email || !product) {
-    return res.status(400).json({ message: 'Email and product are required' });
-  }
-
-  try {
-    const userRef = db.collection('users').doc(email);
-    const doc = await userRef.get();
-    if (!doc.exists) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    const cart = doc.data().cart || { items: [] };
-    const cartItemExist = cart.items.find(item => item.id === product.id);
-    if (cartItemExist) {
-      cartItemExist.quantity += 1;
-    } else {
-      cart.items.push({ ...product, quantity: 1 });
-    }
-
-    await userRef.update({ cart });
-
-    res.status(200).json({ message: 'Product added to cart', cart });
-  } catch (error) {
-    console.error('Error adding to cart:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -993,29 +1015,6 @@ async function removeCartItems(email, cartItems) {
     throw error; 
   }
 }
-
-app.post('/get-cart', async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ message: 'Email is required' });
-  }
-
-  try {
-    const userRef = db.collection('users').doc(email);
-    const doc = await userRef.get();
-    if (!doc.exists) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    const cart = doc.data().cart || { items: [] };
-    res.status(200).json({ cart });
-  } catch (error) {
-    console.error('Error fetching cart:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
 
 app.post('/update-quantity', async (req, res) => {
   const { productId, size, quantity } = req.body;

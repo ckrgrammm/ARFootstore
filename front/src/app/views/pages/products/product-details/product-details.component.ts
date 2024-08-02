@@ -221,7 +221,7 @@ export class ProductDetailsComponent implements OnInit {
     this._cartService.setCartItem(cartItem);
     this._toast.success('Product added to cart successfully', { position: 'top-left' });
   }
-  
+
 
   addProductToWishList(item: any) {
     const WishItem: WishItem = {

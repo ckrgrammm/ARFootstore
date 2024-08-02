@@ -12,7 +12,6 @@ import { map } from 'rxjs/operators';
 export class AuthService {
   private loggedInStatus = new BehaviorSubject<boolean>(this.hasToken());
   loggedInStatus$ = this.loggedInStatus.asObservable();
-
   refreshTokenTimeout: any;
 
   constructor(
@@ -58,7 +57,6 @@ export class AuthService {
       })
     );
   }
-
 
   register(name: string, email: string, password: string): Observable<any> {
     return this.http.post<any>(`${environment.api}register`, { name, email, password });
