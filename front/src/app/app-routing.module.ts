@@ -10,6 +10,8 @@ import { AdminPanelComponent } from './views/pages/admin/panel/admin-panel.compo
 import { AdminListComponent } from './views/pages/admin/admin/admin-list.component';
 import { AddAdminComponent } from './views/pages/admin/admin/add-admin.component';
 import { EditAdminComponent } from './views/pages/admin/admin/edit-admin.component';
+import { OrderComponent } from './views/pages/admin/orders/order.component';
+
 
 
 const routes: Routes = [
@@ -57,12 +59,13 @@ const routes: Routes = [
           { path: 'admins/edit/:id', component: EditAdminComponent },
           { path: 'products/add', component: AdminAddProductComponent },
           { path: 'products/edit/:id', component: AdminEditProductComponent },
+          { path: 'orders', component: OrderComponent },
           { path: '', redirectTo: 'products', pathMatch: 'full' }
         ],
         canActivate: [AuthGuard],
         
       },
-      { path: '', redirectTo: '/admin/dashboard', pathMatch: 'full' }
+      { path: '', redirectTo: 'products', pathMatch: 'full' }
     ]
   },
   {

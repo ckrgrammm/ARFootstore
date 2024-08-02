@@ -205,6 +205,78 @@ app.post('/forgot-password', async (req, res) => {
 
 
 
+app.get('/v1/orders', async (req, res) => {
+  try {
+    const snapshot = await db.collection('orders').get();
+    const allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.status(200).json(allOrders); 
+  } catch (error) {
+    console.error('Error listing orders:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.get('/v1/orders/totalsales/day', async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const snapshot = await db.collection('orders').where('created_at', '>=', today).get();
+    let totalSales = 0;
+    snapshot.forEach(doc => {
+      const order = doc.data();
+      order.cartItems.forEach(item => {
+        totalSales += item.quantity;
+      });
+    });
+    res.status(200).json({ totalSales });
+  } catch (error) {
+    console.error('Error calculating total sales of the day:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.get('/v1/orders/totalsales/alltime', async (req, res) => {
+  try {
+    const snapshot = await db.collection('orders').get();
+    let totalSales = 0;
+    snapshot.forEach(doc => {
+      const order = doc.data();
+      order.cartItems.forEach(item => {
+        totalSales += item.quantity;
+      });
+    });
+    res.status(200).json({ totalSales });
+  } catch (error) {
+    console.error('Error calculating total sales of all time:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.get('/v1/products/topselling', async (req, res) => {
+  try {
+    const snapshot = await db.collection('products').get();
+    let topProduct = null;
+    let maxSales = 0;
+
+    snapshot.forEach(doc => {
+      const product = doc.data();
+      const totalOrdered = product.totalOrdered || 0;
+      if (totalOrdered > maxSales) {
+        maxSales = totalOrdered;
+        topProduct = { id: doc.id, ...product };
+      }
+    });
+
+    if (topProduct) {
+      res.status(200).json(topProduct);
+    } else {
+      res.status(404).json({ message: 'No products found' });
+    }
+  } catch (error) {
+    console.error('Error fetching top selling product:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 
@@ -305,7 +377,6 @@ app.post('/v1/products', upload.fields([{ name: 'files', maxCount: 5 }, { name: 
     res.status(500).json({ message: error.message });
   }
 });
-
 
 app.get('/v1/products', async (req, res) => {
   const { offset = 0 } = req.query;  
@@ -500,7 +571,6 @@ app.put('/v1/products/:id', upload.fields([{ name: 'images', maxCount: 4 }, { na
   }
 });
 
-
 app.get('/v1/products', async (req, res) => {
   const { type, offset = 0, limit = 10 } = req.query;
   try {
@@ -542,8 +612,6 @@ app.post('/v1/auth/refresh-token', async (req, res) => {
   }
 });
 
-
-
 app.get('/v1/search', async (req, res) => {
   const { query, type } = req.query;
 
@@ -577,7 +645,6 @@ app.get('/v1/search', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 app.post('/upload-feet', upload.single('feetImage'), async (req, res) => {
   const { email, foot } = req.body; 
@@ -646,10 +713,6 @@ app.post('/upload-feet', upload.single('feetImage'), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
-
-
-
 
 app.post('/admins', async (req, res) => {
   const { name, email, password, roles = 'admin' } = req.body;
@@ -813,7 +876,6 @@ app.post('/add-to-wishlist', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 app.post('/remove-from-wishlist', async (req, res) => {
   const { email, productId } = req.body;

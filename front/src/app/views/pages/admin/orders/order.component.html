@@ -1,0 +1,77 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+
+<section id="container">
+  <div id="home-content">
+    <div id="box-list">
+      <div class="box">
+        <div>
+          <h2>Total Sales of the Day</h2>
+          <h1>{{ totalSalesOfDay }}</h1>
+          <span class="day-details"><i class='bx bx-up-arrow-alt'></i>Updated today</span>
+        </div>  
+        <div class="card-bx"><span class="card"><i class='bx bx-cart-alt'></i></span></div>  
+      </div>
+      <div class="box">
+        <div>
+          <h2>Total Sales of All Time</h2>
+          <h1>{{ totalSalesOfAllTime }}</h1>
+          <span class="day-details"><i class='bx bx-up-arrow-alt'></i>Updated</span>
+        </div>  
+        <div class="card-bx"><span class="card"><i class='bx bx-cart-alt'></i></span></div>  
+      </div>
+      <div class="box">
+        <div>
+          <h2>Total&nbsp;Order</h2>
+          <h1>$12,876</h1>
+          <span class="day-details"><i class='bx bx-up-arrow-alt'></i>Up&nbsp;from&nbsp;yesterday</span>
+        </div>  
+        <div class="card-bx"><span class="card"><i class='bx bx-cart-alt'></i></span></div>  
+      </div>
+      <div class="box">
+        <div>
+          <h2>Total&nbsp;Return</h2>
+          <h1>11,086</h1>
+          <span class="day-details"><i class='bx bx-down-arrow-alt'></i>Down&nbsp;from&nbsp;today</span>
+        </div>  
+        <div class="card-bx"><span class="card"><i class='bx bx-cart-alt'></i></span></div>
+      </div>
+    </div>
+    <div id="main-content"> 
+      <div id="resent-sale">
+        <div class="heading">Recent Sales</div>
+        <table>
+          <tr>
+            <th>Date</th>
+            <th>Customer Email</th>
+            <th>Postcode</th>
+            <th>Total Price</th>
+          </tr>
+          <tr *ngFor="let order of orders">
+            <td>{{ order.orderDate ? (order.orderDate | date:'short') : 'N/A' }}</td>
+            <td>{{ order.email }}</td>
+            <td>{{ order.postalcode }}</td>
+            <td>{{ order.totalPrice }}</td>
+          </tr>
+        </table>
+        <div id="button">
+          <span>See All</span>
+        </div>
+      </div>
+      <div id="top-sale">
+        <div class="heading">Top Selling Product</div>
+        <div *ngIf="topSellingProduct" id="top-sel-customer">
+          <div class="t-s-c-list">
+            <div class="split-section"> 
+              <img *ngIf="topSellingProduct.images && topSellingProduct.images.length > 0" 
+                   [src]="topSellingProduct.images[0]" 
+                   alt="{{ topSellingProduct.name }}">
+              <span class="t-s-c-name">{{ topSellingProduct.name }}</span>
+            </div>  
+            <span class="t-s-c-price">{{ topSellingProduct.totalOrdered }}</span>
+          </div>
+        </div>
+      </div>
+    </div>  
+  </div>
+</section>

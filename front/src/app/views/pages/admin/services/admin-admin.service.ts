@@ -14,7 +14,7 @@ export class AdminService {
     return this.http.get<any[]>(`${environment.api}admins`);
   }
   
-  getAdmin(id: string): Observable<any> { // Ensure this method exists
+  getAdmin(id: string): Observable<any> { 
     return this.http.get<any>(`${environment.api}admins/${id}`);
   }
 
