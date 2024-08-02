@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Cart, CartItemWithSize } from '../models/cart';
 import { AuthService } from '../auth/services/auth.service';
+import { HotToastService } from '@ngneat/hot-toast';
 
 export const CART_KEY = 'cart';
 
@@ -13,7 +14,11 @@ export const CART_KEY = 'cart';
 export class CartService {
   cart$: BehaviorSubject<Cart> = new BehaviorSubject(this.getCart());
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private toast: HotToastService // Inject HotToastService
+  ) { }
 
   initCartLocalStorage() {
     const cart: Cart = this.getCart();
@@ -47,6 +52,15 @@ export class CartService {
   }
 
   setCartItem(cartItem: CartItemWithSize, updateCartItem?: boolean): Cart {
+    const email = this.authService.getEmail();
+    console.log('setCartItem called, email:', email); // Debug log
+
+    if (!email) {
+      console.log('User is not logged in, showing error message'); // Debug log
+      this.toast.error('Please log in to add items to your cart.');
+      return this.getCart(); // Return early if the user is not logged in
+    }
+
     const cart = this.getCart();
     const cartItemExist = cart.items?.find((item: CartItemWithSize) => item.productId === cartItem.productId && item.size === cartItem.size);
     if (cartItemExist) {
@@ -70,31 +84,31 @@ export class CartService {
     // Update cart on the backend
     this.updateCartOnServer(cart);
 
+    console.log('User is logged in, showing success message'); // Debug log
+    this.toast.success('Product added to cart successfully.'); // Show success message
+
     return cart;
   }
 
-  // deleteCartItem(productId: string, size: string) {
-  //   const cart = this.getCart();
-  //   const newCart = cart.items?.filter((item: CartItemWithSize) => item.productId !== productId || item.size !== size);
-  
-  //   cart.items = newCart;
-  
-  //   const cartJsonString = JSON.stringify(cart);
-  //   localStorage.setItem(CART_KEY, cartJsonString);
-  
-  //   this.cart$.next(cart);
-  //   this.updateCartOnServer(cart);
-  // }
-
   deleteCartItem(productId: string, size: string): void {
     const email = this.authService.getEmail();
+    console.log('Delete Cart Item called with:', { productId, size }); // Debug log
+
     if (email) {
-      this.http.post<Cart>(`${environment.api}remove-cart-item`, { email, productId, size }).subscribe((cart) => {
-        this.cart$.next(cart);
-      });
+      const payload = { email, productId, size };
+      console.log('Sending payload:', payload); // Debug log
+      this.http.post<Cart>(`${environment.api}remove-cart-item`, payload).subscribe(
+        (cart) => {
+          this.cart$.next(cart);
+        },
+        (error) => {
+          console.error('Error removing cart item:', error);
+        }
+      );
+    } else {
+      console.error('No email found in authService');
     }
   }
-  
 
   fetchCartFromServer() {
     const email = this.authService.getEmail();

@@ -826,10 +826,21 @@ app.post('/update-cart', async (req, res) => {
 });
 
 app.post('/remove-cart-item', async (req, res) => {
-  const { email, productId } = req.body;
+  const { email, productId, size } = req.body;
 
-  if (!email || !productId) {
-    return res.status(400).json({ message: 'Email and productId are required' });
+  // Log the payload received
+  console.log('Payload received:', req.body);
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  if (!productId) {
+    return res.status(400).json({ message: 'Product ID is required' });
+  }
+
+  if (!size) {
+    return res.status(400).json({ message: 'Size is required' });
   }
 
   try {
@@ -840,16 +851,18 @@ app.post('/remove-cart-item', async (req, res) => {
     }
 
     const cart = doc.data().cart || { items: [] };
-    const updatedCartItems = cart.items.filter(item => item.product.id !== productId);
+    const updatedCartItems = cart.items.filter(item => item.productId !== productId || item.size !== size);
 
     await userRef.update({ cart: { items: updatedCartItems } });
 
     res.status(200).json({ message: 'Cart item removed successfully', cart: { items: updatedCartItems } });
   } catch (error) {
     console.error('Error removing cart item:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: error.message });
   }
 });
+
+
 
 app.post('/add-to-wishlist', async (req, res) => {
   const { email, product } = req.body;

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HotToastService } from '@ngneat/hot-toast';
 import { CartItemWithSize } from '../../pages/models/cart';
 import { CartService } from '../../pages/services/cart.service';
+import { AuthService } from '../../pages/auth/services/auth.service';
 
 @Component({
   selector: 'app-cart',
@@ -22,7 +23,8 @@ export class CartComponent implements OnInit {
   constructor(
     private router: Router,
     private _cartService: CartService,
-    private _toast: HotToastService
+    private _toast: HotToastService,
+    private authService: AuthService
   ) { }
 
   openCartlist() {
@@ -42,9 +44,9 @@ export class CartComponent implements OnInit {
     });
   }
 
-  deleteCartItem() {
-    this._cartService.deleteCartItem(this.deleteProductId, this.deleteProductSize);
-    this.isVisable = false;
+  deleteCartItem(productId: string, size: string): void {
+    console.log('Deleting item with productId:', productId, 'and size:', size);
+    this._cartService.deleteCartItem(productId, size);
   }
 
   getTotalPrice() {
@@ -85,14 +87,24 @@ export class CartComponent implements OnInit {
     this.router.navigate(['/products', productId]);
   }
 
-  openCofirmModal(cartItem: CartItemWithSize) {
+  openConfirmModal(cartItem: CartItemWithSize) {
     this.isVisable = true;
     this.deleteProductId = cartItem.productId!;
     this.deleteProductSize = cartItem.size!;
   }
 
-  closeCofirmModal() {
+  closeConfirmModal() {
     this.isVisable = false;
+  }
+
+  addToCart(cartItem: CartItemWithSize) {
+    const email = this.authService.getEmail();
+    console.log('addToCart called, email:', email); 
+    if (!email) {
+      this._toast.error('Please log in to add items to your cart.');
+      return;
+    }
+    this._cartService.setCartItem(cartItem);
   }
 
   ngOnInit(): void {
