@@ -113,5 +113,7 @@ export class CartComponent implements OnInit {
     });
     this.getCartList();
     this.getTotalPrice();
+    this._cartService.fetchCartFromServer(); // Fetch cart from server on initialization
   }
+  
 }

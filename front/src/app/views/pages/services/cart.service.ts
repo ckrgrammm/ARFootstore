@@ -93,12 +93,13 @@ export class CartService {
   deleteCartItem(productId: string, size: string): void {
     const email = this.authService.getEmail();
     console.log('Delete Cart Item called with:', { productId, size }); // Debug log
-
+  
     if (email) {
       const payload = { email, productId, size };
       console.log('Sending payload:', payload); // Debug log
       this.http.post<Cart>(`${environment.api}remove-cart-item`, payload).subscribe(
         (cart) => {
+          this.updateLocalCart(cart); // Update local cart
           this.cart$.next(cart);
         },
         (error) => {
@@ -109,6 +110,7 @@ export class CartService {
       console.error('No email found in authService');
     }
   }
+  
 
   fetchCartFromServer() {
     const email = this.authService.getEmail();
