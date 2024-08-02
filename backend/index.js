@@ -794,18 +794,43 @@ app.put('/admins/:id', async (req, res) => {
   }
 });
 
+// app.delete('/admins/:id', async (req, res) => {
+//   const { id } = req.params;
+
+//   try {
+//     const adminRef = db.collection('users').doc(id);
+//     await adminRef.delete();
+//     res.status(200).json({ message: 'Admin deleted successfully' });
+//   } catch (error) {
+//     console.error('Error deleting admin:', error);
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
 app.delete('/admins/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
     const adminRef = db.collection('users').doc(id);
+    const doc = await adminRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+
+    const userEmail = doc.data().email;
+
+    const userRecord = await admin.auth().getUserByEmail(userEmail);
+    await admin.auth().deleteUser(userRecord.uid);
+
     await adminRef.delete();
+
     res.status(200).json({ message: 'Admin deleted successfully' });
   } catch (error) {
     console.error('Error deleting admin:', error);
     res.status(500).json({ message: error.message });
   }
 });
+
 
 app.post('/update-cart', async (req, res) => {
   const { email, cart } = req.body;
