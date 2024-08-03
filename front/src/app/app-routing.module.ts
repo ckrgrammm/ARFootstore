@@ -11,6 +11,8 @@ import { AdminListComponent } from './views/pages/admin/admin/admin-list.compone
 import { AddAdminComponent } from './views/pages/admin/admin/add-admin.component';
 import { EditAdminComponent } from './views/pages/admin/admin/edit-admin.component';
 import { OrderComponent } from './views/pages/admin/orders/order.component';
+import { ComingSoonComponent } from './views/pages/coming-soon/coming-soon.componet';
+
 
 
 
@@ -52,7 +54,6 @@ const routes: Routes = [
         path: 'admin',
         component: AdminPanelComponent,
         children: [
-          // { path: 'dashboard', component: DashboardComponent },
           { path: 'products', component: AdminListProductsComponent },
           { path: 'admins', component: AdminListComponent },
           { path: 'admins/add', component: AddAdminComponent },
@@ -63,10 +64,14 @@ const routes: Routes = [
           { path: '', redirectTo: 'products', pathMatch: 'full' }
         ],
         canActivate: [AuthGuard],
-        
+    
       },
       { path: '', redirectTo: 'products', pathMatch: 'full' }
     ]
+  },
+  {
+    path: 'coming-soon',
+    component: ComingSoonComponent,
   },
   {
     path: 'error',

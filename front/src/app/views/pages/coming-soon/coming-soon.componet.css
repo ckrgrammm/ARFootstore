@@ -1,0 +1,46 @@
+.coming-soon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to right, #ff7e5f, #feb47b);
+    color: white;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .content {
+    max-width: 600px;
+  }
+  
+  h1 {
+    font-size: 4em;
+    margin-bottom: 0.5em;
+  }
+  
+  p {
+    font-size: 1.5em;
+    margin-bottom: 1em;
+  }
+  
+  .countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+  }
+  
+  .time-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .number {
+    font-size: 3em;
+    font-weight: bold;
+  }
+  
+  .label {
+    font-size: 1.2em;
+  }
+  

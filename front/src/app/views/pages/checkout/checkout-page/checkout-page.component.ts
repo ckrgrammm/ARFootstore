@@ -18,7 +18,7 @@ export class CheckoutPageComponent implements OnInit {
   isSubmitted = false;
   cartList!: CartItemWithSize[];
   totalPrice!: number;
-  shippingCost: number = 50; // Default shipping cost
+  shippingCost: number = 50; 
   isCartEmpty: boolean = false;
   userEmail!: string | null;
 
