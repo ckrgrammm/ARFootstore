@@ -117,7 +117,7 @@ export class ProfileComponent implements OnInit {
         this.isVisable = false;
         this.isSubmitted = false;
         this.initProfileForm(); 
-        this.cdRef.detectChanges(); // Explicitly trigger change detection
+        this.cdRef.detectChanges();
       },
       (error: HttpErrorResponse) => {
         this.isSubmitted = false;
@@ -139,6 +139,6 @@ export class ProfileComponent implements OnInit {
     const newProfile = { ...currentProfile, ...updatedProfile };
     this._localstorageService.setUserDetails(newProfile);
     this.profile = newProfile; 
-    this.cdRef.detectChanges(); // Ensure profile is updated immediately
+    this.cdRef.detectChanges(); 
   }
 }

@@ -14,7 +14,7 @@ export class CartItemDetailed {
 
 export class CartItemWithSize {
   productId?: string;
-  product?: any; // Add product for template use
+  product?: any; 
   size?: string;
   quantity?: number;
 }

@@ -193,8 +193,6 @@ app.post('/forgot-password', async (req, res) => {
     const resetPasswordLink = await admin.auth().generatePasswordResetLink(email);
     console.log('Password reset link generated:', resetPasswordLink);
 
-    // Optionally send email here if you have an email service configured
-    // await sendResetPasswordEmail(email, resetPasswordLink);
 
     res.status(200).json({ message: 'Password reset link has been sent to your email', resetPasswordLink });
   } catch (error) {
@@ -203,18 +201,52 @@ app.post('/forgot-password', async (req, res) => {
   }
 });
 
-
-
 app.get('/v1/orders', async (req, res) => {
+  const email = req.query.email;
+
   try {
-    const snapshot = await db.collection('orders').get();
-    const allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.status(200).json(allOrders); 
+    const snapshot = await db.collection('orders').where('email', '==', email).get();
+    const orders = await Promise.all(snapshot.docs.map(async doc => {
+      const orderData = doc.data();
+      const cartItems = await Promise.all(orderData.cartItems.map(async item => {
+        const productDoc = await db.collection('products').doc(item.productId).get();
+        const productData = productDoc.data();
+        return {
+          productId: item.productId,
+          productName: productData ? productData.name : "Unknown",
+          productImage: productData ? productData.images[0] : "assets/images/ImageNotFound.png",
+          quantity: item.quantity,
+          price: item.price
+        };
+      }));
+
+      let orderDate = orderData.orderDate;
+      if (orderDate && orderDate.toDate) {
+        orderDate = orderDate.toDate();
+      } else if (orderDate && !(orderDate instanceof Date)) {
+        orderDate = new Date(orderDate);
+      }
+
+      return {
+        id: doc.id,
+        ...orderData,
+        cartItems: cartItems,
+        orderDate: orderDate,
+        totalAmount: orderData.totalAmount
+      };
+    }));
+    console.log('Transformed Orders:', orders);
+    res.status(200).json(orders);
   } catch (error) {
     console.error('Error listing orders:', error);
     res.status(500).json({ message: error.message });
   }
 });
+
+
+
+
+
 
 app.get('/v1/orders/totalsales/day', async (req, res) => {
   try {
@@ -793,19 +825,6 @@ app.put('/admins/:id', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
-// app.delete('/admins/:id', async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     const adminRef = db.collection('users').doc(id);
-//     await adminRef.delete();
-//     res.status(200).json({ message: 'Admin deleted successfully' });
-//   } catch (error) {
-//     console.error('Error deleting admin:', error);
-//     res.status(500).json({ message: error.message });
-//   }
-// });
 
 app.delete('/admins/:id', async (req, res) => {
   const { id } = req.params;

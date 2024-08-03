@@ -1,15 +1,19 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { LocalstorageService } from '../../auth/services/localstorage.service';
 import { UserProfileService } from '../../../shared/user/user-profile.service';
+import { Order } from '../../models/order';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
+  private ordersSubject = new BehaviorSubject<Order[]>([]);
+  orders$ = this.ordersSubject.asObservable();
+
   constructor(
     private _http: HttpClient,
     private _localstorageService: LocalstorageService,
@@ -42,5 +46,13 @@ export class UserService {
   
   uploadFeetImage(formData: FormData): Observable<any> {
     return this._http.post<any>(`${environment.api}upload-feet`, formData, this.getHttpOptions());
+  }
+
+  fetchUserOrders(email: string): void {
+    const params = new HttpParams().set('email', email);
+    this._http.get<Order[]>(`${environment.api}v1/orders`, { params }).subscribe(
+      orders => this.ordersSubject.next(orders),
+      error => console.error('Error fetching orders:', error)
+    );
   }
 }

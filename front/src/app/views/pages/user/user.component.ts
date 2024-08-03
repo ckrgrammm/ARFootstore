@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';  // Import Router
+import { Router } from '@angular/router';  
 import { UserService } from './services/user.service';
-import { AuthService } from '../auth/services/auth.service';  // Import AuthService
-import { HotToastService } from '@ngneat/hot-toast';  // Import HotToastService
+import { AuthService } from '../auth/services/auth.service';  
+import { HotToastService } from '@ngneat/hot-toast'; 
 
 @Component({
   selector: 'app-user',
@@ -14,9 +14,9 @@ export class UserComponent implements OnInit {
 
   constructor(
     private _userService: UserService,
-    private _auth: AuthService,  // Inject AuthService
-    private _router: Router,  // Inject Router
-    private _toast: HotToastService  // Inject HotToastService
+    private _auth: AuthService,  
+    private _router: Router, 
+    private _toast: HotToastService  
   ) { }
 
   ngOnInit(): void {
@@ -41,10 +41,10 @@ export class UserComponent implements OnInit {
     const toastRef = this._toast.loading('Logging you out...');  
 
     setTimeout(() => {
-      this._auth.logout();  // Use AuthService to handle logout
-      toastRef.close();  // Close the loading toast
-      this._toast.success('Successfully logged out');  // Display the success toast message
-      this._router.navigate(['/products']);  // Navigate to the products page
-    }, 2000);  // Delay of 2 seconds
+      this._auth.logout(); 
+      toastRef.close();  
+      this._toast.success('Successfully logged out'); 
+      this._router.navigate(['/products']); 
+    }, 2000); 
   }
 }

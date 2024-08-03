@@ -40,7 +40,6 @@ export class RegisterFeetComponent implements OnInit {
       this.currentHint = this.hints[this.hintIndex];
     }, 3000);
 
-    // Fetch user feet sizes from Firebase
     if (this.email) {
       const userDetails = this.authService.getUserDetailsFromLocalStorage();
       if (userDetails) {

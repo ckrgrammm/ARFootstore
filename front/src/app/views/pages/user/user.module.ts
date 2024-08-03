@@ -4,10 +4,12 @@ import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { UserComponent } from './user.component';
+import { UserOrderComponent } from './user-order/user.order.component';
 import { ProfileComponent } from './profile/profile.component';
 import { WishlistComponent } from './wishlist/wishlist.component';
 import { RegisterFeetComponent } from './feet/register-feet.component'; 
 import { SharedModule } from '../../shared/shared.module';
+
 
 const routes: Routes = [
   {
@@ -31,6 +33,10 @@ const routes: Routes = [
         path: 'feet',
         component: RegisterFeetComponent, 
       },
+      {
+        path: 'user-order',
+        component: UserOrderComponent, 
+      },
     ],
   },
 ];
@@ -41,6 +47,7 @@ const routes: Routes = [
     ProfileComponent,
     WishlistComponent,
     RegisterFeetComponent, 
+    UserOrderComponent
   ],
   imports: [
     CommonModule,
