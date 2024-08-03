@@ -11,7 +11,7 @@ export class OrderComponent implements OnInit {
   totalSalesOfDay: number = 0;
   totalSalesOfAllTime: number = 0;
   totalOrders: number = 0;
-  totalPriceOfAllItems: number = 0;  // Add this line
+  totalPriceOfAllItems: number = 0;
   orders: any[] = [];
   topSellingProduct: any = null;
 
@@ -21,7 +21,7 @@ export class OrderComponent implements OnInit {
     this.loadTotalSalesOfDay();
     this.loadTotalSalesOfAllTime();
     this.loadTotalOrders();
-    this.loadTotalPriceOfAllItems();  // Add this line
+    this.loadTotalPriceOfAllItems();
     this.loadOrders();
     this.loadTopSellingProduct();
   }
@@ -59,7 +59,7 @@ export class OrderComponent implements OnInit {
     );
   }
 
-  loadTotalPriceOfAllItems(): void {  // Add this method
+  loadTotalPriceOfAllItems(): void {
     this.orderService.getTotalPriceOfAllItems().subscribe(
       (data) => {
         this.totalPriceOfAllItems = data.totalPrice;
@@ -73,7 +73,9 @@ export class OrderComponent implements OnInit {
   loadOrders(): void {
     this.orderService.getOrders().subscribe(
       (data) => {
-        this.orders = data;
+        this.orders = data.sort((a: any, b: any) => {
+          return new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime();
+        });
         console.log("Orders:", this.orders);
       },
       (error) => {

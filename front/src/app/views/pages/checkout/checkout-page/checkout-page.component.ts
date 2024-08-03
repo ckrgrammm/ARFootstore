@@ -89,7 +89,7 @@ export class CheckoutPageComponent implements OnInit {
         size: item.size,
         quantity: item.quantity
       })),
-      totalPrice: this.totalPrice + this.shippingCost, // Include shipping cost
+      totalPrice: this.totalPrice + this.shippingCost, 
       orderDate: new Date().toISOString()
     };
   
