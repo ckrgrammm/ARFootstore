@@ -23,7 +23,14 @@ export class AdminOrderService {
   }
 
   getOrders(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.api}v1/orders`);
+    return this.http.get<any[]>(`${environment.api}v2/orders`);
   }
 
+  getTotalOrders(): Observable<any> {  
+    return this.http.get<any>(`${environment.api}v1/orders/totalcount`);
+  }
+
+  getTotalPriceOfAllItems(): Observable<any> {  
+    return this.http.get<any>(`${environment.api}v1/orders/totalprice`);
+  }
 }

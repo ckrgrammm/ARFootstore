@@ -204,11 +204,16 @@ app.post('/forgot-password', async (req, res) => {
 app.get('/v1/orders', async (req, res) => {
   const email = req.query.email;
 
+  // Check if email is provided
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
   try {
     const snapshot = await db.collection('orders').where('email', '==', email).get();
-    const orders = await Promise.all(snapshot.docs.map(async doc => {
+    const orders = await Promise.all(snapshot.docs.map(async (doc) => {
       const orderData = doc.data();
-      const cartItems = await Promise.all(orderData.cartItems.map(async item => {
+      const cartItems = await Promise.all(orderData.cartItems.map(async (item) => {
         const productDoc = await db.collection('products').doc(item.productId).get();
         const productData = productDoc.data();
         return {
@@ -244,8 +249,46 @@ app.get('/v1/orders', async (req, res) => {
 });
 
 
+app.get('/v2/orders', async (req, res) => {
+  try {
+    const snapshot = await db.collection('orders').get();
+    const allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.status(200).json(allOrders); 
+  } catch (error) {
+    console.error('Error listing orders:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
+app.get('/v1/orders/totalcount', async (req, res) => {
+  try {
+    const snapshot = await db.collection('orders').get();
+    const totalOrders = snapshot.size;
+    res.status(200).json({ totalOrders });
+  } catch (error) {
+    console.error('Error getting total order count:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
+app.get('/v1/orders/totalprice', async (req, res) => {
+  try {
+    const snapshot = await db.collection('orders').get();
+    let totalPrice = 0;
+
+    snapshot.forEach(doc => {
+      const order = doc.data();
+      if (order.totalPrice) {
+        totalPrice += order.totalPrice;
+      }
+    });
+
+    res.status(200).json({ totalPrice });
+  } catch (error) {
+    console.error('Error getting total price of all items:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 app.get('/v1/orders/totalsales/day', async (req, res) => {
@@ -1074,6 +1117,48 @@ app.post('/get-cart', async (req, res) => {
 });
 
 
+// app.post('/update-quantity', async (req, res) => {
+//   const { productId, size, quantity } = req.body;
+
+//   console.log('Received update-quantity request:', req.body);
+
+//   if (!productId || !size || quantity === undefined) {
+//     console.log('Missing required fields:', { productId, size, quantity });
+//     return res.status(400).json({ message: 'Missing required fields' });
+//   }
+
+//   try {
+//     const productRef = db.collection('products').doc(productId);
+//     const productDoc = await productRef.get();
+
+//     if (!productDoc.exists) {
+//       console.log('Product not found:', productId);
+//       return res.status(404).json({ message: 'Product not found' });
+//     }
+
+//     const productData = productDoc.data();
+//     const sizeIndex = productData.sizes.findIndex(s => s.size === size);
+
+//     if (sizeIndex === -1) {
+//       console.log('Size not found:', size);
+//       return res.status(404).json({ message: 'Size not found' });
+//     }
+
+//     productData.sizes[sizeIndex].amount -= quantity;
+//     productData.totalOrdered += quantity;
+
+//     console.log(`Updating product ${productId} size ${size} quantity to ${productData.sizes[sizeIndex].amount}`);
+//     console.log(`Updating product ${productId} totalOrdered to ${productData.totalOrdered}`);
+
+//     await productRef.update({ sizes: productData.sizes, totalOrdered: productData.totalOrdered });
+
+//     return res.status(200).json({ message: 'Quantity and totalOrdered updated successfully' });
+//   } catch (error) {
+//     console.error('Error updating quantity:', error);
+//     return res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
+
 app.post('/update-quantity', async (req, res) => {
   const { productId, size, quantity } = req.body;
 
@@ -1115,4 +1200,11 @@ app.post('/update-quantity', async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
+
+
+
+
+
 

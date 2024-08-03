@@ -95,10 +95,10 @@ export class CheckoutPageComponent implements OnInit {
   
     this.http.post(`${environment.api}checkout`, orderData).subscribe(
       response => {
-        this.router.navigate(['/checkout/success']);
         this.updateProductQuantities(orderData.cartItems);
         this._cartService.emptyCart();
         this._cartService.fetchCartFromServer();
+        this.router.navigate(['/checkout/success'], { state: { totalPrice: orderData.totalPrice } });
       },
       error => {
         console.error('Order placement error', error);

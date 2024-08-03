@@ -10,6 +10,8 @@ export class OrderComponent implements OnInit {
 
   totalSalesOfDay: number = 0;
   totalSalesOfAllTime: number = 0;
+  totalOrders: number = 0;
+  totalPriceOfAllItems: number = 0;  // Add this line
   orders: any[] = [];
   topSellingProduct: any = null;
 
@@ -18,6 +20,8 @@ export class OrderComponent implements OnInit {
   ngOnInit(): void {
     this.loadTotalSalesOfDay();
     this.loadTotalSalesOfAllTime();
+    this.loadTotalOrders();
+    this.loadTotalPriceOfAllItems();  // Add this line
     this.loadOrders();
     this.loadTopSellingProduct();
   }
@@ -40,6 +44,28 @@ export class OrderComponent implements OnInit {
       },
       (error) => {
         console.error('Error loading total sales of all time:', error);
+      }
+    );
+  }
+
+  loadTotalOrders(): void {
+    this.orderService.getTotalOrders().subscribe(
+      (data) => {
+        this.totalOrders = data.totalOrders;
+      },
+      (error) => {
+        console.error('Error loading total orders:', error);
+      }
+    );
+  }
+
+  loadTotalPriceOfAllItems(): void {  // Add this method
+    this.orderService.getTotalPriceOfAllItems().subscribe(
+      (data) => {
+        this.totalPriceOfAllItems = data.totalPrice;
+      },
+      (error) => {
+        console.error('Error loading total price of all items:', error);
       }
     );
   }

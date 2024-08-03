@@ -23,15 +23,15 @@
       <div class="box">
         <div>
           <h2>Total&nbsp;Order</h2>
-          <h1>$12,876</h1>
+          <h1>{{ totalOrders }}</h1> 
           <span class="day-details"><i class='bx bx-up-arrow-alt'></i>Up&nbsp;from&nbsp;yesterday</span>
         </div>  
         <div class="card-bx"><span class="card"><i class='bx bx-cart-alt'></i></span></div>  
       </div>
       <div class="box">
         <div>
-          <h2>Total&nbsp;Return</h2>
-          <h1>11,086</h1>
+          <h2>Total&nbsp;Price of All Time</h2>
+          <h1>{{ totalPriceOfAllItems }}</h1> 
           <span class="day-details"><i class='bx bx-down-arrow-alt'></i>Down&nbsp;from&nbsp;today</span>
         </div>  
         <div class="card-bx"><span class="card"><i class='bx bx-cart-alt'></i></span></div>
@@ -54,9 +54,6 @@
             <td>{{ order.totalPrice }}</td>
           </tr>
         </table>
-        <div id="button">
-          <span>See All</span>
-        </div>
       </div>
       <div id="top-sale">
         <div class="heading">Top Selling Product</div>
