@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminProductService } from '../services/admin-product.service';
 import { HotToastService } from '@ngneat/hot-toast';
@@ -34,7 +34,7 @@ export class AdminAddProductComponent implements OnInit {
       stockStatus: ['', Validators.required],
       model3d: [false],
       numSizes: [1, [Validators.required, Validators.min(1), Validators.max(50)]],
-      sizes: this.fb.array([])
+      sizes: this.fb.array([], this.duplicateSizeValidator)
     });
 
     this.onNumSizesChange({ target: { value: 1 } });
@@ -97,6 +97,13 @@ export class AdminAddProductComponent implements OnInit {
       this.selectedModel3DFile = null;
       this.selectedArQrFile = null;
     }
+  }
+
+  duplicateSizeValidator(control: AbstractControl): ValidationErrors | null {
+    const sizes = control.value as { size: number, amount: number }[];
+    const sizeValues = sizes.map(s => s.size);
+    const hasDuplicates = sizeValues.some((size, index) => sizeValues.indexOf(size) !== index);
+    return hasDuplicates ? { duplicateSizes: true } : null;
   }
 
   onSubmit(): void {

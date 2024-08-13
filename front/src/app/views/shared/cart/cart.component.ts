@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HotToastService } from '@ngneat/hot-toast';
 import { CartItemWithSize } from '../../pages/models/cart';
 import { CartService } from '../../pages/services/cart.service';
+import { AuthService } from '../../pages/auth/services/auth.service'; 
 
 @Component({
   selector: 'app-cart',
@@ -22,7 +23,8 @@ export class CartComponent implements OnInit {
   constructor(
     private router: Router,
     private _cartService: CartService,
-    private _toast: HotToastService
+    private _toast: HotToastService,
+    private authService: AuthService 
   ) { }
 
   openCartlist() {
@@ -104,7 +106,7 @@ export class CartComponent implements OnInit {
   }
 
   addToCart(cartItem: CartItemWithSize) {
-    if (this._cartService.canAddToCart()) {
+    if (this.authService.loggedIn()) { 
       this._cartService.setCartItem(cartItem);
       this._toast.success('Item added to cart!');
     } else {

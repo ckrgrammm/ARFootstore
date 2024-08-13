@@ -59,7 +59,7 @@ export class AppModule {
     private _localstorageService: LocalstorageService
   ) {
     _wishlistService.initWishlistLocalStorage();
-    _cartService.initCartLocalStorage();
+    // _cartService.initCartLocalStorage();
     if(_localstorageService.getToken()) {
       _authService.startRefreshTokenTimer();
     }

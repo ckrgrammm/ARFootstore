@@ -79,7 +79,7 @@
   <div class="container" infinite-scroll [infiniteScrollDistance]="scrollDistance"
     [infiniteScrollUpDistance]="scrollUpDistance" [infiniteScrollThrottle]="throttle" (scrolled)="onScroll()">
     <header class="section-heading  d-flex justify-content-between align-items-center">
-      <h4 class="section-title text-muted">Showing 1 - {{limit}} Products</h4>
+      <h4 class="section-title text-muted">Showing 1 - {{products.length}} Products</h4>
       <div class="filter-container d-flex align-items-center">
         <p>Sort by: </p>
         <select class="form-select" [(ngModel)]="filterValue">
@@ -98,7 +98,6 @@
         <div class="product">
           <div class="product-image">
             <a style="height: 227px;" routerLink="/products/{{product?.id}}">
-              <!-- <img [src]="product?.image" alt="Product_image" onerror="this.onerror=null;this.src='assets/images/ImageNotFound.png'"> -->
               <img [src]="product?.image || 'assets/images/ImageNotFound.png'" alt="Product_image"
                 onerror="this.onerror=null;this.src='assets/images/ImageNotFound.png'">
             </a>
@@ -124,11 +123,11 @@
                 <h5 class="product-price">${{product?.price}}</h5>
                 <span *ngIf="(product?.id)%3==0">$59.99</span>
               </div>
-              <span class="product-atc rounded-circle">
+              <!-- <span class="product-atc rounded-circle">
                 <button type="button" class="btn btn-circle text-muted" (click)="addProductToCart(product)">
                   <i class="fa fa-shopping-cart"></i>
                 </button>
-              </span>
+              </span> -->
             </div>
           </div>
         </div>

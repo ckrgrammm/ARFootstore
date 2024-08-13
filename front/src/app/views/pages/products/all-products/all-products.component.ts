@@ -6,6 +6,7 @@ import { WishlistService } from '../../services/wishlist.service';
 import { ProductService } from '../services/product.service';
 import { HotToastService } from '@ngneat/hot-toast';
 
+
 @Component({
   selector: 'app-all-products',
   templateUrl: './all-products.component.html',
@@ -14,18 +15,17 @@ import { HotToastService } from '@ngneat/hot-toast';
 export class AllProductsComponent implements OnInit {
 
   products: any[] = [];
-  PageNumber: number = 1;
-  numberOfPages: any[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  offset: number = 0;
+  limit: number = 20;
   isFavourite: boolean = false;
   WishItems!: WishItem[];
   filterValue: string = "Default";
-  items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20];
   Loading: boolean = false;
+  items = Array(10).fill(0); 
 
   throttle = 300;
   scrollDistance = 1;
   scrollUpDistance = 2;
-  limit: number = 20;
 
   constructor(
     private _product: ProductService,
@@ -55,8 +55,6 @@ export class AllProductsComponent implements OnInit {
     });
   }
   
-  
-
   addProductToCart(item: any) {
     const cartItem: CartItem = {
       product: item,
@@ -106,13 +104,11 @@ export class AllProductsComponent implements OnInit {
   }
 
   onScroll() {
-    const offset = this.limit;
-    this.limit = (this.limit + 20) == 178 || (this.limit + 20) > 178 ? 178 : this.limit + 20;
-    if (this.limit !== 178) this.getAllProducts(Math.floor(offset), Math.floor(this.limit));
+    if (this.Loading) return; 
   }
 
   ngOnInit(): void {
-    this.getAllProducts(0, this.limit);
+    this.getAllProducts(this.offset, this.limit);
     this.getWishList();
   }
 }

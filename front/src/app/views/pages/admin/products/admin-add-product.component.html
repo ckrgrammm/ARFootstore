@@ -80,6 +80,9 @@
         </div>
       </div>
     </div>
+    <div *ngIf="addProductForm.get('sizes')?.errors?.duplicateSizes" class="text-danger">
+      Duplicate sizes are not allowed.
+    </div>
     <div class="mb-3 form-check">
       <input type="checkbox" class="form-check-input" id="model3d" formControlName="model3d" (change)="toggle3DModel($event)">
       <label class="form-check-label" for="model3d">Is this product compatible with 3D model?</label>

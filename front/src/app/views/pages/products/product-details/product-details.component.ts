@@ -8,6 +8,8 @@ import { HotToastService } from '@ngneat/hot-toast';
 import { WishItem } from '../../models/wishlist';
 import { WishlistService } from '../../services/wishlist.service';
 import { CartItemWithSize } from '../../models/cart';
+import { AuthService } from '../../../pages/auth/services/auth.service'; 
+
 
 declare var bootstrap: any;
 
@@ -125,6 +127,8 @@ export class ProductDetailsComponent implements OnInit {
     private _route: ActivatedRoute,
     private _toast: HotToastService,
     private _wishlistService: WishlistService,
+    private authService: AuthService, 
+
   ) { }
 
   ZoomImage(event: any) {
@@ -208,16 +212,23 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   addProductToCart(item: any) {
+    if (!this.authService.loggedIn()) {
+      this._toast.error('Please log in to add products to the cart.', { position: 'top-left' });
+      return;
+    }
+  
     if (!this.product.stockStatus || !this.selectedSize || this.selectedSize.amount === 0) {
       this._toast.error('Product is out of stock or size is unavailable', { position: 'top-left' });
       return;
     }
+  
     const cartItem: CartItemWithSize = {
       productId: item.id,
-      product: item, // Include product details
+      product: item, 
       size: this.selectedSize.size,
       quantity: 1
     };
+  
     this._cartService.setCartItem(cartItem);
     this._toast.success('Product added to cart successfully', { position: 'top-left' });
   }

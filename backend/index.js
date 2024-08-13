@@ -810,20 +810,69 @@ app.delete('/admins/:id', async (req, res) => {
 app.post('/update-cart', async (req, res) => {
   const { email, cart } = req.body;
 
+  console.log('Request received to update cart:', { email, cart });
+
   if (!email || !cart) {
+    console.error('Invalid request: Missing email or cart');
     return res.status(400).json({ message: 'Email and cart data are required' });
   }
 
   try {
     const userRef = db.collection('users').doc(email);
-    await userRef.update({ cart });
 
-    res.status(200).json({ message: 'Cart updated successfully' });
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      console.error('User not found:', email);
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    console.log('User document found:', JSON.stringify(doc.data(), null, 2));
+
+    const filteredItems = cart.items.filter(item => item.quantity > 0);
+
+    const simplifiedCart = {
+      items: filteredItems
+    };
+
+    console.log('Attempting to update cart with:', JSON.stringify(simplifiedCart, null, 2));
+
+    await userRef.update({ cart: simplifiedCart });
+
+    console.log('Firebase update succeeded');
+
+    const updatedDoc = await userRef.get();
+    const updatedCart = updatedDoc.data().cart;
+
+    const compareCarts = (original, updated) => {
+      if (original.length !== updated.length) return false;
+      for (let i = 0; i < original.length; i++) {
+        if (
+          original[i].productId !== updated[i].productId ||
+          original[i].size !== updated[i].size ||
+          original[i].quantity !== updated[i].quantity
+        ) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    if (compareCarts(simplifiedCart.items, updatedCart.items)) {
+      console.log('Cart updated successfully in Firebase:', JSON.stringify(updatedCart, null, 2));
+      res.status(200).json({ message: 'Cart updated successfully', cart: updatedCart });
+    } else {
+      console.error('Verification failed: Updated cart does not match the expected data');
+      throw new Error('Failed to update cart in the database');
+    }
   } catch (error) {
-    console.error('Error updating cart:', error);
+    console.error('Error updating cart:', error.message, error.stack);
     res.status(500).json({ message: error.message });
   }
 });
+
+
+
+
 
 app.post('/remove-cart-item', async (req, res) => {
   const { email, productId } = req.body;
